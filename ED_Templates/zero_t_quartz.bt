@@ -1,0 +1,18 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+typedef struct
+{
+    ushort  QuartzIndex;
+    ushort  QuartzAtt;
+    ushort  QuartzSepithCost[8];
+    ubyte   QuartzElementalValue[8];    
+} QUARTZ;
+
+while ((FileSize() - FTell()) >= 28)
+    QUARTZ quartz;

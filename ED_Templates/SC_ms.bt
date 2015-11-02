@@ -1,0 +1,115 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:空之轨迹SC MSFileTemplate.bt
+// Author:acgngca
+// Revision:2011-07-20 从3rd直接改的，Ai 战技对得上，其它未验证
+// Purpose:查看编辑MSFile
+// References:  http://tieba.baidu.com/p/1117902374
+//              http://tieba.baidu.com/p/596221801  18L 20L
+//              http://tieba.baidu.com/p/708648905
+//--------------------------------------
+
+#define ED6_SC
+#include "ED6_common.bt.h"
+
+typedef struct
+{
+    FileIndex           ASFileIndex;            // LOWORD = FileIndex, HIWORD = DAT Index
+    ushort              Level;
+    uint                HPMax;
+    uint                HP;
+    ushort              EPMax;
+    ushort              EP;
+    ushort              CPMax;
+    ushort              CP;
+    ushort              SPD;
+    ushort              MoveSPD;                // 移动速度
+    ushort              MOV;
+    ushort              STR;
+    ushort              DEF;
+    ushort              ATS;
+    ushort              ADF;
+    ushort              DEX;
+    ushort              AGL;
+    ushort              RNG;
+    ushort              MoveAfterAttack;        // 被击退距离，一般为0，距离为1;设置过大会导致缓慢后退
+    ushort              EXP;                    // 经验值,(敌方等级-已方等级) * EXP
+    ubyte               DUMMY_STRUCT_02[2] <hidden=true>; //全0
+} ED6_MONSTER_STATUS1;
+
+typedef struct
+{
+    ushort              AIType;                     // 0x00 0x01 0x02 0x10 0x13 0x14 0xFF
+    ushort              Darkness <hidden=true>;     // 怪周围的暗度，正常1000
+    ubyte               DUMMY_STRUCT_03[4] <hidden=true>;   // 几乎都一样 第一个字节控制悬浮？
+    ubyte               Flags;                      // 10 敌方 40 己方 20 NPC 80逃跑...
+    ubyte               DeathFlags;                 // 02 不参与战场胜利判定 04 死后留在战场上
+    ubyte               UnderAttackFlags;           // 0x08 Risist ATDelay 0x02 不被击退 0x01 被攻击不转身(3D)  0x10 无法被攻击到  0x20 强制miss
+    ubyte               DUMMY_STRUCT_04[6] <hidden=true>;
+    ubyte               Sex;                        // 0 男 1 女 //确定！！！  不准确
+    uint                Size;                       // 占地大小，1格400 高达1200
+    ubyte               DUMMY_STRUCT_05[4] <hidden=true>;   //全0
+    uint                Height <hidden=true>;       // 高度，选中目标时箭头离地高度，正常800
+//  ushort              CharSize;                   // 占 CharSize / 2 / 400 格   //???
+    ubyte               DUMMY_STRUCT_06[4] <hidden=true>;   // 全0除Ｒ-巨兽,Ｄ·幻影,极限级零式,奥尔杰尤ＭＫⅡ,黑暗降临者
+    ubyte               ConditionDisplayPosition[4]  <hidden=true>;
+                                                    // 状态在头顶的显示位置 左右/前后/左右/未知 60/50/A0/B0 10/00/F0/FF
+    FileIndex           SYFileIndex;                // AT条头像
+    RESISTANCE          Resistance;                 // 异常状态抗性
+    ubyte               DUMMY_STRUCT_07[11] <hidden=true>;
+    ushort              ArtsAttResistance[4];       // 七曜属性有效率
+    ubyte               Sepith[7];                  // 掉落耀晶片
+    ushort              DropIndex[2];               // 掉落物
+    ubyte               DropProbability[2];         // 掉落概率
+    WORD                Equip[5];                   // 装备
+    WORD                Orb[4];                     // 回路
+} ED6_MONSTER_STATUS2;
+
+typedef struct
+{
+    ED6_AI_INFO         NormalAttack;               // 攻击
+
+    ubyte               DUMMY_STRUCT_09[8] <hidden=true>; //全0
+
+    ubyte               ArtCount;                   // 魔法, 最多80个
+    if(ArtCount > 0)
+    {
+        ED6_AI_INFO     Art[ArtCount];
+    }
+
+    ubyte               CraftCount;                 // 战技, 最多10个
+    if(CraftCount > 0)
+    {
+        ED6_AI_INFO     Craft[CraftCount];
+    }
+
+    ubyte               SCraftCount;                // S技, 最多5个
+    if(SCraftCount > 0)
+    {
+        ED6_AI_INFO     SCraft[SCraftCount];
+    }
+} ED6_MONSTER_Ai;
+
+typedef struct
+{
+    ubyte               CraftCount;                 // 自定义技能, 最多15个??
+    if(CraftCount > 0)
+    {
+        ED6_CRAFT_INFO  Craft[CraftCount] <optimize=false>;
+    }
+} ED6_MONSTER_CRAFT;
+
+    ED6_MONSTER_STATUS1 ED6_monster_status1 <open=true>;
+    ED6_MONSTER_STATUS2 ED6_monster_status2;
+    ED6_MONSTER_Ai      ED6_monster_ai;
+    ED6_MONSTER_CRAFT   ED6_monster_craft;
+    ArrayBytes          fleeParameter(4);  // 逃跑参数 03320000 每次行动50%概率逃跑; 01320A00 血量10%以下50%概率逃跑; 02320000 头头死亡后50%概率逃跑
+    string              MonsterName;
+    string              MonsterIntro;
+
+    local int IsEnd = FileSize() - FTell();
+    if (IsEnd != 0)
+    {
+        ubyte           unknownEnd[IsEnd];
+    }

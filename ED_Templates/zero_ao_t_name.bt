@@ -1,0 +1,188 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File: 零之轨迹/碧之轨迹 t_name._dt.h
+// Author:acgngca
+// Revision:
+// Purpose:
+//--------------------------------------
+#define ED_ZERO_AO
+#include "ED6_common.bt.h"
+
+typedef struct(int parCHARACTER)    // 0x14 bytes
+{
+    if (parCHARACTER == 1)
+    {
+        ushort      CharacterIndex <fgcolor=cBlue>;
+        ushort      addrCharacterName;
+        FileIndex   CHFileIndexStand <format=hex>;
+        FileIndex   CHFileIndexMove <format=hex>;
+        FileIndex   MSFileIndex <format=hex>;
+        FSkip(4);
+
+        local uint  addrTemp = FTell();
+        local uint  addrCharacterNameReal = addrCharacterName + addrFileBase;
+        FSeek(addrCharacterNameReal);
+        string  CharacterName;
+        FSeek(addrTemp);
+    }
+    else if (parCHARACTER == 0)
+    {
+        byte            MSFileIndex;    // 去掉 WARNING Line xx: Empty structure.
+        local string    CharacterName = "nul \t";
+    }
+} CHARACTER <read=readCharacterName,write=writeCharacterName>;
+
+string readCharacterName(CHARACTER &a)
+{
+    string temp;
+    SPrintf(temp,"ms%08X  ",a.MSFileIndex);
+    return StrDel(temp,2,3) + a.CharacterName;
+}
+
+void writeCharacterName(CHARACTER &a, string s)
+{
+    // 复制用
+}
+
+typedef struct
+{
+    local uint  addrFileBase    = FTell();
+
+    local int   i = 0, j = 0, k = 0;
+    local int   characterIndexMax = 999;
+    local uint  addrTemp, addrK;
+
+    while(1)
+    {
+        addrTemp = FTell();
+        addrK = addrTemp;
+        k = ReadUShort(addrK);
+
+        if (k > characterIndexMax || i > characterIndexMax)
+        {
+            break;
+        }
+        else //if (k == i)
+        {
+            CHARACTER   character(1);
+            i++;
+        }/*
+        else if (k < i)
+        {
+            Warning("Warning: Reverse index met at pos 0x%X, 0x%X.", addrTemp, addrK);
+            Printf("Warning: Reverse index met at pos 0x%X, 0x%X.\n", addrTemp, addrK);
+            FSkip(0x14);
+        }
+        else
+        {
+            for (j = i; j < k; j++)
+            {
+                FSeek(addrFileBase);
+                CHARACTER   character(0) <hidden=true>;
+                i++;
+            }
+            FSeek(addrK);
+            CHARACTER   character(1);
+            i++;
+        }*/
+    }
+} T_name <read=readT_name>;
+
+wstring readT_name(T_name &a)
+{
+    return  L"角色列表";
+}
+
+if (!IsProcess() && FTell() == 0)
+{
+    T_name  characterTable <open=true>;
+}
+
+
+
+/* 不能处理乱序
+    while(ReadUShort(FTell()) != 999 && i < 1000)
+    {
+        if (ReadUShort(FTell()) == i)
+        {
+            CHARACTER   character(1);
+            i++;
+        }
+        else if (ReadUShort(FTell()) < i)
+        {
+            FSkip(0x14);
+        }
+        else
+        {
+            addrTemp = FTell();
+            FSeek(addrFileBase);
+            CHARACTER   character(0) <hidden=true>;
+            i++;
+            FSeek(addrTemp);
+        }
+*/
+
+
+/* 处理乱序（放弃使用）
+
+    local int   characterIndex = 0;
+    local int   characterCount = 200;   // 个数
+    local int   characterIndexMax = 0;  // 最大编号
+    local int   i = 0, isExist = 0;
+
+    // 确定最大编号、尝试确定个数
+    i = 0, isExist = 0;
+    FSeek(addrFileBase);
+    while (i < characterCount)
+    {
+        if (ReadUShort(FTell()) >= 999)
+        {
+            isExist = 1;
+            break;
+        }
+        else
+        {
+            if (ReadUShort(FTell()) > characterIndexMax)
+            {
+                characterIndexMax = ReadUShort(FTell());
+            }
+            FSkip(0x14);
+            i++;
+        }
+    }
+
+    if (isExist == 1)
+    {
+        characterCount = i - 1;
+    }
+
+    for (characterIndex = 0; characterIndex <= characterIndexMax; characterIndex++)
+    {
+        i = 0, isExist = 0;
+        FSeek(addrFileBase);
+        while (ReadUShort(FTell()) < 999 && i <= characterCount)
+        {
+            if (ReadUShort(FTell()) == characterIndex)
+            {
+                isExist = 1;
+                break;
+            }
+            else
+            {
+                FSkip(0x14);
+                i++;
+            }
+        }
+
+        if (isExist == 1)
+        {
+            CHARACTER   character(1);
+        }
+        else if (isExist == 0)
+        {
+            FSeek(addrFileBase);
+            CHARACTER   character(0) <hidden=true>;
+        }
+    }
+*/

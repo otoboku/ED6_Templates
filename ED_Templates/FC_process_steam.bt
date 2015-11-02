@@ -1,0 +1,18 @@
+//--------------------------------------
+//--- 010 Editor v6.0.3 Binary Template
+//
+// File: fc_process_steam.bt
+// Author: acgngca
+// Revision: 2015-10-30
+// Purpose: try to parse ed6 fc process for steam versions
+//--------------------------------------
+#define ED6_FC
+#define ED6_FC_STEAM
+#include "ed6_version.bt"
+
+if (g_GameVersion == ed6VersionUnknown)
+{
+    g_GameVersion = ed61steam;
+}
+
+#include "fc_process.bt"

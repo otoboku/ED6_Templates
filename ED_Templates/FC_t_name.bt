@@ -1,0 +1,12 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File: FC_t_name.bt
+// Author: acgngca
+// Revision: 2015-10-30
+// Purpose: to parse FC t_name
+//--------------------------------------
+#ifndef ED_VERSION
+#define ED6_FC
+#endif
+#include "3rd_t_name.bt"

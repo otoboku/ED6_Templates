@@ -1,0 +1,141 @@
+//--------------------------------------
+//--- 010 Editor v4.0.4 Binary Template
+//
+// File:
+// Author: acgngca
+// Revision:
+// Purpose:
+//--------------------------------------
+
+#include "ED6_common.bt.h"
+
+typedef struct // 0xC
+{
+    DUMMY_STRUCT(0x2);
+    ubyte state;        // 02 查看 10 完成 20 已报告 40 过期
+    DUMMY_STRUCT(0x1);
+    USHORT  DPExtra;
+    USHORT  MiraExtra;
+    ULONG   progress;
+} QuestState <read=readQuestState,write=writeQuestState>;
+
+string readQuestState(QuestState &a)
+{
+    string s;
+    SPrintf(s, "%X %X %d %d", a.state, a.progress, a.DPExtra, a.MiraExtra);
+    return s;
+}
+
+void writeQuestState(QuestState &a, string s) {;}
+
+
+typedef struct _QUEST // 0x1C
+{
+    ubyte   index <fgcolor=cLtBlue>;
+    ubyte   flag <format=hex>;   // 0x20 紧急
+    ushort  Mira;
+    ubyte   DP;
+    ubyte   Sequence;
+    //ushort  ScenaFlag[3] <format=hex>;
+    TypeFlag ScenaFlag[3];
+    uint    addrTitle <hidden=true>;
+    uint    addrClient <hidden=true>;
+    uint    addrContent <hidden=true>;
+    uint    addrAddrProgress <hidden=true>;
+
+    local uint ProgressCount;
+    if (index < 0xC8)
+    {
+        ProgressCount = (ReadUInt(startof(addrAddrProgress) + 0x1C) - addrAddrProgress)/4;
+    }
+    else
+    {
+        ProgressCount = 1;
+    }
+
+
+    local uint  addrTemp = FTell();
+
+    if (IsProcess() && exists(questStateTable) && index < 0xC8)
+    {
+        FSeek(startof(questStateTable[index]));
+        QuestState  questState;
+    }
+    local uint  addrTitleReal = addrTitle + addrT_quest;
+    local uint  addrClientReal = addrClient + addrT_quest;
+    FSeek(addrTitleReal);
+    string  Title;
+    FSeek(addrClientReal);
+    string  Client;
+    FSeek(addrContent + addrT_quest);
+    string  Content;
+
+    local uint i;
+    for (i=0; i<ProgressCount; i++)
+    {       
+        if (addrAddrProgress + (i+1)*4 + addrT_quest > FileSize())
+            break;
+        FSeek(addrAddrProgress + i*4 + addrT_quest);        
+        uint    addrProgress <hidden=true>;
+
+        if (addrProgress[i] + addrT_quest >= FileSize())
+            break;
+        FSeek(addrProgress[i] + addrT_quest);
+        String  Progress;
+    }
+
+    FSeek(addrTemp);
+
+} QUEST <read=readQUEST,write=writeQUEST>;
+
+string readQUEST(QUEST &a)
+{
+    string s;
+    if (IsProcess() && a.index < 0xC8)
+    {
+        SPrintf(s, "%02X %02X %02X %s", a.index, a.flag, a.questState.state, a.Title); 
+        //SPrintf(s, "%04X %s", a.u_06, a.Title); 
+    }
+    else
+    {
+        SPrintf(s, "%02X %02X %s", a.index, a.flag, a.Title);        
+    }       
+
+    return s;
+}
+
+void writeQUEST(QUEST &a, string s) {;}
+
+typedef struct
+{
+    local uint i = 0;
+    while(1)
+    {
+        QUEST   quest;
+        if (quest.index == 255)
+            break;
+        if (++i > 0x64)
+            break;
+    }
+} T_quest <read=readT_quest>;
+
+string readT_quest(T_quest &a)
+{
+    return  "任务";
+}
+
+if (!IsProcess())
+{
+    local uint addrT_quest = 0;
+}
+else
+{
+    FSeek(getPtrValue00(addrCQuest + 0x4) + 0x4618);
+    QuestState  questStateTable[0xC8] <optimize=true, hidden=true>;    
+}
+
+//local uint ProgressCount = 5;
+//#include "ao_t_quest.bt"
+FSeek(addrT_quest);
+T_quest         questTable;
+

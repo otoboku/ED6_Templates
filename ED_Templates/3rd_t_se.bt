@@ -1,0 +1,60 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File: 3rd_t_se.bt
+// Author: acgngca
+// Revision: 2015-10-31
+// Purpose: to parse fc/sc/3rd t_se
+//--------------------------------------
+
+typedef struct  // 0xC
+{
+    USHORT      index_dummy;                // 0x0
+    USHORT      concurrency;                // 0x2
+    INT         seFileIndex <format=hex>;   // 0x4
+    USHORT      isCache;                    // 0x8
+    UCHAR       isLoop;                     // 0xA
+    UCHAR       is_0B;                      // 0xB
+} T_se_entry <read=readT_se_entry>;
+
+string readT_se_entry(T_se_entry &a)
+{
+    string  str;
+    SPrintf(str, "%d %d %d %d %6X", a.concurrency, a.isCache, a.isLoop, a.is_0B, a.seFileIndex);
+    return  str;
+}
+
+typedef struct
+{
+    local ULONG count = 0x800;  // 3rd 0x7D0
+    local ULONG i;
+    i = (FileSize() - FTell()) / 0xC;
+    if (i < count)
+    {
+        count = i;
+    }
+    for (i = 0; i < count; ++i)
+    {
+        T_se_entry se_entry;
+        if (se_entry.index_dummy == 0xFFFF)
+        {
+            break;
+        }
+    }
+} T_se <read=readT_se, size=8>;
+
+wstring readT_se(T_se &a)
+{
+    if (IsProcess() || startof(a) != 0)
+    {
+        return L"t_se";
+    }
+    string  s;
+    SPrintf(s, "t_se %d", a.i);
+    return  StringToWString(s) + L"个";
+}
+
+if (!IsProcess() && FTell() == 0)
+{
+    T_se    seTable <open=true>;
+}

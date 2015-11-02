@@ -1,0 +1,577 @@
+//--------------------------------------
+//--- 010 Editor v4.0.4 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+//#include "ED6_common_define.bt.h"
+//#define ED6_FC        0x01
+//#define ED6_SC        0x02
+//#define ED6_3RD       0x04
+//#define ED_ZERO       0x08
+#define ED_AO       0x10
+//local int ED6_NO = ED6_SC;
+#include "ED6_common.bt.h"
+
+// DT
+Assert(IsProcess(), "It's not a process!");
+//Printf("%x\r\n", ReadUInt(ProcessHeapToLocalAddress(0)));
+
+local uint addrCGLOBAL = ReadUInt(ProcessHeapToLocalAddress(0xC29988));
+local uint addrCGLOBALLocal = ProcessHeapToLocalAddress(addrCGLOBAL);
+local uint addrBase = addrCGLOBALLocal;
+local uint addrCEDAO = addrCGLOBALLocal;
+local uint addrCScript = addrCEDAO + 0x384EC;
+local uint addrCActor = ProcessHeapToLocalAddress(ReadUInt(addrCScript));
+//local uint addrCQuest = ProcessHeapToLocalAddress(ReadUInt(addrCScript+0x8) + 0x4D428);
+local uint addrCQuest = addrCEDAO + 0x4D428;
+local uint addrMemCBattle = ReadUInt(ProcessHeapToLocalAddress(addrCGLOBAL+0x82BA4));
+//local uint addrTextGroupA = ReadUInt(ProcessHeapToLocalAddress(addrMemCBattle+0x38D24))+0x4D3E8;
+local uint addrTextGroupA = addrCGLOBAL+0x4D3E8;
+    FSeek(ProcessHeapToLocalAddress(addrTextGroupA) + 0x04);
+    uint addrMemT_crfget_entry <format=hex, hidden=true>;
+    uint addrMemT_item <format=hex, hidden=true>;
+    uint addrMemT_ittxt <format=hex, hidden=true>;
+    uint addrMemT_item2 <format=hex, hidden=true>;
+    uint addrMemT_ittxt2 <format=hex, hidden=true>;
+    uint addrMemT_quartz <format=hex, hidden=true>;
+    uint addrMemT_mstqrt <format=hex, hidden=true>;
+    uint addrMemT_magic <format=hex, hidden=true>;
+    uint addrMemT_crfget <format=hex, hidden=true>;
+    uint addrMemT_magqrt <format=hex, hidden=true>;
+    uint addrMemT_town <format=hex, hidden=true>;
+    uint addrMemT_cook <format=hex, hidden=true>;
+    uint addrMemT_trade <format=hex, hidden=true>;
+
+    local uint addrT_crfget_entry = ProcessHeapToLocalAddress(addrMemT_crfget_entry);
+    local uint addrT_item = ProcessHeapToLocalAddress(addrMemT_item);
+    local uint addrT_ittxt = ProcessHeapToLocalAddress(addrMemT_ittxt);
+    local uint addrT_item2 = ProcessHeapToLocalAddress(addrMemT_item2);
+    local uint addrT_ittxt2 = ProcessHeapToLocalAddress(addrMemT_ittxt2);
+    local uint addrT_quartz = ProcessHeapToLocalAddress(addrMemT_quartz);
+    local uint addrT_mstqrt = ProcessHeapToLocalAddress(addrMemT_mstqrt);
+    local uint addrT_magic = ProcessHeapToLocalAddress(addrMemT_magic);
+    local uint addrT_crfget = ProcessHeapToLocalAddress(addrMemT_crfget);
+    local uint addrT_magqrt = ProcessHeapToLocalAddress(addrMemT_magqrt);
+    local uint addrT_town = ProcessHeapToLocalAddress(addrMemT_town);
+    local uint addrT_cook = ProcessHeapToLocalAddress(addrMemT_cook);
+    local uint addrT_trade = ProcessHeapToLocalAddress(addrMemT_trade);
+
+//local uint addrT_magic = ProcessHeapToLocalAddress(ReadUInt(ProcessHeapToLocalAddress(addrTextGroupA+0x20)));
+
+local uint addrTextGroupB = addrCGLOBAL+0x82BC0;
+FSeek(ProcessHeapToLocalAddress(addrTextGroupB));
+uint addrMemT_name <format=hex, hidden=true>;
+uint addrMemT_sltget <format=hex, hidden=true>;
+uint addrMemT_quest <format=hex, hidden=true>;
+uint addrMemT_memo <format=hex, hidden=true>;
+uint addrMemT_orb <format=hex, hidden=true>;
+uint addrMemT_world <format=hex, hidden=true>;
+FSkip(0x8);
+uint addrMemT_bgm <format=hex, hidden=true>;
+uint addrMemT_record <format=hex, hidden=true>;
+uint addrMemT_msas <format=hex, hidden=true>;
+uint addrMemT_friend <format=hex, hidden=true>;
+
+local uint addrT_name = ProcessHeapToLocalAddress(addrMemT_name);
+local uint addrT_sltget = ProcessHeapToLocalAddress(addrMemT_sltget);
+local uint addrT_quest = ProcessHeapToLocalAddress(addrMemT_quest);
+local uint addrT_memo = ProcessHeapToLocalAddress(addrMemT_memo);
+local uint addrT_orb = ProcessHeapToLocalAddress(addrMemT_orb);
+local uint addrT_world = ProcessHeapToLocalAddress(addrMemT_world);
+local uint addrT_bgm = ProcessHeapToLocalAddress(addrMemT_bgm);
+local uint addrT_record = ProcessHeapToLocalAddress(addrMemT_record);
+local uint addrT_msas = ProcessHeapToLocalAddress(addrMemT_msas);
+local uint addrT_friend = ProcessHeapToLocalAddress(addrMemT_friend);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// table
+//////////////////////////////////////////////////////////////////////////////////////////////////////// 
+#include "t_magic.bt"
+FSeek(addrT_magic);
+T_magic         magicTable;
+
+#include "zero_ao_t_name.bt"
+FSeek(addrT_name);
+T_name          characterTable;
+
+#include "zero_ao_t_record.bt"
+//FSeek(addrT_record);
+//T_record      recordTable;
+
+#include "zero_ao_t_town.bt"
+
+//local uint MasterQuartzCount = 0x16;
+#include "ao_t_mstqrt.bt"
+//FSeek(addrT_mstqrt);
+//T_mstqrt         masterQuartzTable;    
+
+#include "ao_t_quest.bt"
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// scena
+//////////////////////////////////////////////////////////////////////////////////////////////////////// 
+    //FSeek(ProcessHeapToLocalAddress(addrCGLOBAL) + 0x384EC + 0x7D4);  // 0x38EA8
+    FSeek(addrCScript + 0x7D4);
+    uint addrMemScenaFile[6] <format=hex, hidden=true>;
+
+    //FSeek(ProcessHeapToLocalAddress(addrCGLOBAL) + 0x78F74);
+    FSeek(addrCActor + 0x2BC);
+    uint addrMemScenaStart1 <format=hex, hidden=true>;
+    uint addrMemScenaStart2 <format=hex, hidden=true>;
+    int  scenaCharacterAmount <hidden=true>;    // 最多0x80个
+
+    local uint addrScenaFileIndex; // 循环用
+    local uint addrScenaFile[6];
+    for (addrScenaFileIndex = 0; addrScenaFileIndex < 6; addrScenaFileIndex++)
+    {
+        addrScenaFile[addrScenaFileIndex] = ProcessHeapToLocalAddress(addrMemScenaFile[addrScenaFileIndex]);
+    }
+
+    local uint addrScenaStart1 = ProcessHeapToLocalAddress(addrMemScenaStart1);
+    local uint addrScenaStart2 = ProcessHeapToLocalAddress(addrMemScenaStart2);
+// 场景文件和战斗信息初始化 部分
+#include "zero_ao_scena.bt.h"
+
+    // 场景文件in内存
+    if (addrMemScenaFile[0] != 0)
+    {
+        // 五个可能的子文件
+        if (ReadUInt(0x20 + addrScenaFile[0]) != 0xFFFFFFFF && addrMemScenaFile[1] != 0)
+        {
+            FSeek(addrScenaFile[1]);
+            ScenaFile   scenaFile1(addrScenaFile[1]);
+        }
+        if (ReadUInt(0x24 + addrScenaFile[0]) != 0xFFFFFFFF && addrMemScenaFile[2] != 0)
+        {
+            FSeek(addrScenaFile[2]);
+            ScenaFile   scenaFile2(addrScenaFile[2]);
+        }
+        if (ReadUInt(0x28 + addrScenaFile[0]) != 0xFFFFFFFF && addrMemScenaFile[3] != 0)
+        {
+            FSeek(addrScenaFile[3]);
+            ScenaFile   scenaFile3(addrScenaFile[3]);
+        }
+        if (ReadUInt(0x2C + addrScenaFile[0]) != 0xFFFFFFFF && addrMemScenaFile[4] != 0)
+        {
+            FSeek(addrScenaFile[4]);
+            ScenaFile   scenaFile4(addrScenaFile[4]);
+        }
+        if (ReadUInt(0x30 + addrScenaFile[0]) != 0xFFFFFFFF && addrMemScenaFile[5] != 0)
+        {
+            FSeek(addrScenaFile[5]);
+            ScenaFile   scenaFile5(addrScenaFile[5]);
+        }
+
+        FSeek(addrScenaFile[0]);    // =? addrBase + 0xC3880 
+        ScenaFile   scenaFile(addrScenaFile[0]);
+
+    }
+/*
+    // 具体化的角色信息，1包括外形，2包括怪的战斗参数
+    if (addrMemScenaStart1 != 0 && scenaCharacterAmount != 0)
+    {
+        FSeek(addrScenaStart1);
+        ScenaCharacterInf1Group     scenaCharacterInf1;
+    }
+
+    if (addrMemScenaStart2 != 0 && scenaCharacterAmount != 0)
+    {
+        FSeek(addrScenaStart2);
+        ScenaCharacterInf2Group     scenaCharacterInf2;
+    }
+*/
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// battle
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+typedef struct
+{
+    local int           addrStart = FTell();
+    local int           soldierIndex = j;
+    // 0
+    ushort              SoldierNo;                  // 我方0-7，敌方8-15，支援16-19，待分身20-21
+    ubyte               unknownFlags1 <format=hex, hidden=true>;
+    ubyte               Flags <format=hex>;                      // 10 敌方 40 己方 ...
+    ubyte               DeathFlags <format=hex>;                 // 02 不参与战场胜利判定 04 死后留在战场上
+    ubyte               UnderAttackFlags <format=hex>;           // 08 Resist ATDelay 02 不被击退 01 无法移动(移动会卡死)  10 无法被攻击到  20 强制miss
+    FSkip(4);   // 复制上面四个参数？？？
+    ushort              CharacterIndex;
+    FSkip(2);   // FF 00 常量？
+    ushort              ATActTime;  // AT条动多少次，初始为0; AiTime1F
+    FileIndex           SYFileIndex <format=hex>;
+    FileIndex           MSFileIndex <format=hex>;
+    FileIndex           ASFileIndex <format=hex>;  
+        DUMMY_STRUCT(1);                                    // 0x1C
+        BYTE                    TeamRushAddition;           // 0x1D
+        USHORT                  MasterQuartzUsedFlag;       // 0x1E
+
+        DUMMY_STRUCT(0x16C - 0x20);
+
+        USHORT                  CurrentActionType;          // 0x16C
+
+        DUMMY_STRUCT(2);
+
+        USHORT                  PreviousActionType;         // 0x170
+        USHORT                  SelectedActionType;         // 0x172
+        USHORT                  Unknown_174;
+        USHORT                  Unknown_176;
+        USHORT                  Unknown_178;
+        USHORT                  Unknown_17A;
+        USHORT                  WhoAttackMe;                // 0x17C
+        USHORT                  CurrentCraftIndex;          // 0x17E
+        USHORT                  LastActionIndex;            // 0x180
+        USHORT                  CurrentAiIndex;             // 0x182
+
+        DUMMY_STRUCT(0x1AA - 0x184);
+
+        USHORT                  Target[0x10];               // 0x1AA
+        BYTE                    TargetCount;                // 0x1CA
+        BYTE                    SelectedTargetIndex;        // 0x1CB
+        COORD                   SelectedTargetPos;          // 0x1CC
+
+        //DUMMY_STRUCT(0x234 - 0x1D0);
+        DUMMY_STRUCT(0x20C - 0x1D0);
+        BYTE                    IsHitMiss[0x10];            // 0x20C
+        BYTE                    IsHitJudged[0x10];          // 0x21C
+        DUMMY_STRUCT(0x234 - 0x22C);
+
+    local uint          addrHP = FTell();
+    STATUS              StatusBasic;    // normal难度基础值
+    // 568 + 52
+    STATUS              StatusSum;      // 算上难度、装备、回路
+    ushort              MoveSPD <hidden=true>;                // 移动速度，我方人员也从ms文件中读取
+    ushort              MoveAfterAttack ;        // 从ms文件中读取
+    CONDITION           Condition[32];
+    ubyte               DUMMY_STRUCT_02[24] <hidden=true>;
+    uint                AT;
+    uint                AT2;    // AiTime08用
+    // 0x544
+    ushort              AIType;
+    ushort              EXPGet;                     // 战斗胜利 结算经验前暂存
+    ushort              DropIndex1 <hidden=true>;                 // 掉落物 物品代码
+    ushort              DropIndex2 <hidden=true>;
+    ubyte               DropProbability1 <hidden=true>;           // 掉落概率
+    ubyte               DropProbability2 <hidden=true>;    
+    ubyte               Sex <hidden=true>; 
+    ubyte               DisplayHighLevelArtsAttResistance <hidden=true>;      
+    // 是否开启时空幻有效率显示，0/8 不开启 1/9 开启，应该是标志位，可能含有更多信息
+    ushort              Equip[5];                   // 装备
+    ushort              Orb[7];                     // 回路   7个 
+
+    ED7_AI_INFO         NormalAttack;
+    ED7_AI_INFO         Arts[80];
+    ED7_AI_INFO         Craft[15];
+    ED7_AI_INFO         SCraft[5];
+    ED7_AI_INFO         SupportCraft[3]; 
+    CraftLastUsed_INFO  CraftLastUsed;
+    FleeParameter       fleeParameter;
+    // 3768 + addrStart
+    // 16条战技定义共512字节，（说明256 名字32）共288x
+    //DUMMY_STRUCT(0x50);
+    //DUMMY_STRUCT(0x38);
+    local uint          addrCraftDefinition = FTell();
+    local ushort        CRAFT_INFO_SIZE = 28;   // 魔法条长度 碧轨24+4 空轨零轨28+4
+    ED7_CRAFT_DEFINITION_GROUP  CraftDefinition;    // 实际上只能放15个
+    // 4280
+    ////ubyte               DUMMY_STRUCT_06[32] <hidden=true>;
+    ubyte               DUMMY_STRUCT_07[288*16];    // 战技说明
+    //ubyte             DUMMY_STRUCT_08[64];
+    // FSkip(288*15 + 352);
+    // 8952
+    ubyte               Sepith[7];                  // 掉落耀晶片
+    ubyte               DUMMY_STRUCT_09 <hidden=true>;
+    ushort              ArtsAttResistance[8];       // 七曜属性有效率
+    RESISTANCE          Resistance;
+
+
+    FSeek(addrBattleStart + 0x660 + 0x31C*soldierIndex + 0xE0);
+    //FSeek(ProcessHeapToLocalAddress(ReadUInt(addrHP-8)));
+    string              CharacterName;
+    // 9112
+    FSeek(addrStart + 0x2380);
+    string              CharacterIntro;
+
+    FSeek(addrStart + 0x2408);
+    ULONG                       SummonCount;            // 0x2408
+
+    FSeek(addrStart + 0x2418);
+    ubyte               DUMMY_STRUCT_12[8] <hidden=true>;
+
+    FSeek(addrCBattle + 0x5F00 * soldierIndex + 0x3A800);
+    USHORT tempAS;
+    FSeek(addrStart + CHR_BATTLE_INF_SIZE);
+    // 9112 + 164 = 9276 243C
+
+} ED7_CHARACTER_BATTLE_INF <read = readMSFileIndex>;
+
+string readMSFileIndex(ED7_CHARACTER_BATTLE_INF &a)
+{
+    string  temp;
+    SPrintf(temp,"ms%x",a.MSFileIndex);
+    temp = StrDel(temp,2,3);
+    return  temp + " " + a.CharacterName;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////
+// CActor
+////////////////////////////////////////////////////////////////////////////////////////////////////////    
+typedef struct
+{
+    FSeek(addrCActor + 0x94);
+    ULONG           SystemFlag[2];
+    FSeek(addrCActor + 0x9C);
+    //ubyte         EXPR_1E[0x220] <format=hex>;
+    ubyte           Flag[0x220] <format=hex>;
+
+    // 角色信息 战斗外
+SetForeColor(cBlue);
+    //FSeek(addrBase + 0x78F84);
+    //FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x384EC) + 0x2CC));
+    FSeek(addrCActor + 0x2CC);
+    ushort          Team[8];
+    ushort          TeamB[8];
+SetForeColor(cNone);
+    
+    //FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x384EC) + 0x2EC));
+    STATUS          Status[12];
+    // 0x79438
+    EQUIP           Equip[12];
+    // 
+    ARTS            Arts[12];
+    // 
+    CRAFT           Craft[12];
+    // 
+    SCRAFT          SCraft[12];
+    // 0x79D98
+    ORBMENT         Orbment[12] <optimize=true>;
+
+    // 拥有的物品及数量
+    //FSeek(addrBase + 0x79D3C);
+    //ItemInBagGroup    itemInBag;
+    ushort  itemInBag;
+
+    FSeek(addrCActor + 0x4444);
+    //COORD         MasterQuartzLvExp[MasterQuartzCount];
+    COORD           MasterQuartzLvExp[0x1E];
+    FSeek(addrBase + 0x7D264);
+    POSITION        Position[16] <optimize=true>;   // 最后两个和Mira地址一样
+
+    FSeek(addrBase + 0x7D280);
+    int         Mira;
+    FSkip(4);
+    int         Medal ;//<hidden=true>;
+    FSkip(4);
+    FSkip(4);
+    //int           DP_nextLv;
+    int         DP; // Detective Point
+    int         Sepith[7];
+
+SetForeColor(cBlue);
+    FSeek(addrCActor + 0x6118);
+    int             BurstEnergy;
+
+    //FSeek(addrBase + 0x78CB8 + 0x6140);
+    FSeek(addrCActor + 0x6140);
+    ushort          Replace[12];    // 替换形象，人物代码
+
+    FSeek(addrBase + 0x7EE10);
+    ushort          SBreak[12];     // S爆发技设定
+
+    FSeek(addrCActor + 0x61A0);
+    ubyte           Feelings[0x10]; 
+// 64 琪雅；65 艾莉；66 缇欧；67 兰迪；68 诺艾尔；69 瓦吉；6A 莉夏；6B 达德利警官；6C 伊莉娅小姐；6D 塞茜尔姐姐；6E 芙兰；6F 修利
+
+    FSeek(addrBase + 0xA6FA5);
+    enum <ubyte> DIFFICULTY { Normal = 0, Hard, Nightmare, Easy } Difficulty;
+SetForeColor(cNone);
+
+//////////////////////////////////////////////////////////////////////////////////
+    local uint addrTemp = FTell();
+    FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x82B20)) + 0x18);
+    float           gameSpeed;
+
+    FSeek(addrBase + 0x81C7C);
+    ArrayBytes      Record(8);      // 48个标志位，全成就6个F
+
+    FSeek(addrBase + 0x78CB8 + 0x848E);
+    COORD           BgmReplace[0x10];
+
+    FSeek(addrCActor + 0x4F84);
+    int             ScenaCode <format=hex>;         // 场景代码
+    int             ScenaNode;                      // 场景中的出入口代码，貌似都是从0x64开始的 EntryNo
+    int             ChapterIndex;                   // 章节代码，序章-3章-间章-4章-终章 0-3-4-5-6
+    int             ScenaNameIndex;                 // 场景名称代码
+    FSeek(startof(placeTable.place[ScenaNameIndex]));
+    string          ScenaName;
+
+    //FSeek(addrCScript + 0x314);
+    //int               EXPR_20_45;
+
+    FSeek(addrTemp);
+} MENU;
+
+    //FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x384EC) + 0x2CC));
+FSeek(addrCActor);
+MENU menu;
+
+// 战斗中 各按钮是否可用等参数..DT
+typedef struct
+{
+    local int   index = i;
+    FSkip(0x30);
+    ULONG   color <format=hex>;
+    FSkip(0x62);
+    ushort      battleButtonPar;    // 0 空心 字暗 1 实心  2 不可用 4 字亮，正常为 5可用7不可用
+} BattleButton <read=readBattleButton>;
+
+string readBattleButton(BattleButton &a)
+{
+    switch (a.index)
+    {
+    case 0:
+        return "攻击";
+        break;
+    case 1:
+        return "战技";
+        break;
+    case 2:
+        return "道具";
+        break;
+    case 3:
+        return "撤退";
+        break;
+    case 4:
+        return "移动";
+        break;
+    case 5:
+        return "魔法";
+        break;
+    case 6:
+        return "爆灵";
+        break;
+    default:
+        return "nul";
+    }
+};
+
+typedef struct
+{   
+    local int i = 0;
+    FSkip(0x28);
+    for (i = 0; i < 9; i++)
+    {
+        BattleButton    battleButton;   // 依次为 攻击、战技、道具、撤退、移动、魔法
+    }
+} BattleButtonGroup;
+
+typedef struct  //0x78
+{
+    byte dummy1[0x60];
+    int addrSoldier <format=hex>;//0x60
+    int addrCBattle <format=hex>;//0x64
+    int icoAT;          //0x68 不含20 空  含04 行动、delay后的([20A]0销毁); 含40 当前行动的(1销毁)
+    USHORT par <format=hex>;        //0x6C
+    byte sequence;
+    byte dummy3[0x2];
+    //byte SoldierNo;
+    byte RNo;       //0x71
+    byte dummy4;    
+    byte Pri;   //0x73 pri
+    byte IsSBreaking;
+    byte dummy5[3];
+} ED6_AT <read = ReadED6_AT>;
+
+string ReadED6_AT(ED6_AT &ed6_at)
+{
+    string strTemp;
+
+    if (~ed6_at.par & 0x20)
+        SPrintf(strTemp, "nul");
+    else
+    {
+        SPrintf(strTemp, "%02d %02d at%02d %02x", ReadUShort(ProcessHeapToLocalAddress(ed6_at.addrSoldier)), ed6_at.sequence, ed6_at.icoAT, ed6_at.par);
+        //SPrintf(strTemp, "%d", (ed6_at.addrSoldier-0x60EF38)/CHR_BATTLE_INF_SIZE);    
+    }
+    //SPrintf(strTemp, "%08x %02d %03d", ed6_at.addrSoldier, ed6_at.sequence, ed6_at.at);
+    return strTemp;
+    
+}
+
+if (addrMemCBattle != 0)
+{
+    local uint addrBattleStart = ProcessHeapToLocalAddress(addrMemCBattle);
+    local uint addrCBattle = addrBattleStart;
+    FSeek(addrBattleStart);
+    
+        // 战斗部分
+        if (addrBattleStart != 0)
+        {
+            local int       i = 0, j = 0;
+            local int       CHR_BATTLE_INF_SIZE = 0x2424;
+            local uint      addrChr0 = addrBattleStart + 0x4DE4;
+            //FSeek(addrBattleStart + 0xAC);
+            //string            BattleMap;
+            FSeek(addrChr0);
+            for (j = 0; j == ReadUShort(FTell()); j++)
+            ////for (j = 0; j < 23; j++)
+            {
+                if (ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 16) == 0 && 
+                    ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 20) == 0 &&
+                    ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 24) == 0 )
+                    ED7_CHARACTER_BATTLE_INF    ED7_character_battle_inf <hidden=true>;//
+                else
+                    ED7_CHARACTER_BATTLE_INF    ED7_character_battle_inf;
+            }
+        FSeek(addrBattleStart + 0x113080);
+        int         CurrentChrIndex;
+
+        FSeek(addrBattleStart + 0x113090);
+        int         CurrentTargetIndex;
+
+        FSeek(addrBattleStart + 0xC36D8);
+        byte        BattleStartCondition;   // 战斗开场状况 0 普通, 1 被偷袭, 02 先制, 04 奇袭, 可以锁定..
+
+        FSeek(addrBattleStart + 0xC3104);       
+        BattleButtonGroup   battleButton;
+
+local uint addrCBattleATBar = addrCBattle + 0x103148;
+
+FSeek(addrCBattleATBar+0x1C20);
+ULONG pED6_AT[0x3C];
+for (i=0; i<0x3C; i++)
+{
+    FSeek(ProcessHeapToLocalAddress(pED6_AT[i]));
+    if(~ReadUShort(FTell()+0x6C) &  0x20)
+    {
+        ED6_AT atStruct;// <hidden=true>;
+    }
+    else
+        ED6_AT atStruct;
+}
+
+FSeek(addrCBattleATBar);
+ED6_AT at[0x3C];
+
+        }
+}
+
+/*
+#include "ao_save_system.bt"
+FSeek(addrBase);
+MemorySystemData memorySystemData;
+//FSeek(getPtrValueH0(0xDC850C));
+FSeek(ProcessHeapToLocalAddress(0x24432270));
+LocalSystemData localSystemData;
+*/
+
+//#include "ao_poker.bt"
+
+FSeek(addrT_crfget);
+ubyte byteT_crfget;
+FSeek(addrT_crfget_entry);
+ubyte byteT_crfget_entry;
+FSeek(addrT_ittxt);
+ubyte byteT_ittxt;

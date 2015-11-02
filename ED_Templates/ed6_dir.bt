@@ -1,0 +1,186 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+#ifndef _ed6_dir_bt_
+#define _ed6_dir_bt_
+
+#include "010_def.bt.h"
+
+#ifndef     ED6_ALL
+#define     ED6_DIR_FILE_COUNT_MAX      0x3F
+#define     ED6_DIR_ENTRY_COUNT_MAX     0xFA0
+#else
+#ifdef      ED6_FC
+#define     ED6_DIR_FILE_COUNT_MAX      0x20
+#define     ED6_DIR_ENTRY_COUNT_MAX     0x7FF
+#else
+#ifdef      ED6_SC
+#define     ED6_DIR_FILE_COUNT_MAX      0x3F
+#define     ED6_DIR_ENTRY_COUNT_MAX     0xC80
+#else
+#define     ED6_DIR_FILE_COUNT_MAX      0x3F
+#define     ED6_DIR_ENTRY_COUNT_MAX     0xFA0
+#endif
+#endif
+#endif
+
+#define     ED6_DIR_FILE_MAGIC          0x1A52494420424C
+#define     ED6_DIR_ENTRY_SIZE          0x24
+
+// ED6_DIR_ENTRY_COUNT_MAX
+// FC:  0x7FF
+// SC:  0xC80
+// 3rd: 0xFA0
+
+typedef struct  // 0x24
+{
+    CHAR    FileName[0x10];
+    ULONG   FileSize;           // 0x10
+    ULONG   ULong_14;           // 0x14
+    ULONG   ULong_18;           // 0x18
+    time_t  Time;               // 0x1C
+    ULONG   Offset;             // 0x20
+} ED6_DIR_FILE_ENTRY <read=readED6_DIR_FILE_ENTRY, write=writeED6_DIR_FILE_ENTRY>;
+
+string readED6_DIR_FILE_ENTRY(ED6_DIR_FILE_ENTRY &a)
+{
+    return  a.FileName;
+}
+void writeED6_DIR_FILE_ENTRY(ED6_DIR_FILE_ENTRY &a, string s) {};
+
+// parIndex = -1
+// parCount = -1
+typedef struct _ED6_DIR(ULONG parIndex, ULONG parCount)
+{
+    local ULONG Index = parIndex;
+    local ULONG i;
+    local ULONG count = ED6_DIR_ENTRY_COUNT_MAX;
+
+    if (parCount != -1 && parCount < count)
+    {
+        count = parCount;
+    }
+
+    if (ReadUInt64(FTell()) == ED6_DIR_FILE_MAGIC)
+    {
+        CHAR    Magic[8];
+        ULONG   FileCount;
+        FSkip(4);
+        //Printf("%u\n", parCount);
+        parCount = FileCount;
+        //Printf("%u\n", parCount);
+        if (FileCount < count)
+        {
+            count = FileCount;
+        }
+    }
+
+    i = (FileSize() - FTell()) / ED6_DIR_ENTRY_SIZE;
+    if (i < count)
+    {
+        count = i;
+        Printf("ED6_DIR warning: FileCount is too large or file is too small!\r\n");
+    }
+
+    for (i = 0; i != count; ++i)
+    {
+        if (parCount == -1 && ReadByte(FTell()) == 0)
+        {
+            break;
+        }
+        /*
+        if (ReadString(FTell(), 0x10) != "/_______.___")
+        {
+            ED6_DIR_FILE_ENTRY  file;
+        }
+        else
+        {
+            ED6_DIR_FILE_ENTRY  file;// <hidden=true>;
+        }*/
+        ED6_DIR_FILE_ENTRY  file;
+    }
+
+    if (FTell() == startof(this))
+    {
+        CHAR    dummy;
+    }
+} ED6_DIR <read=readED6_DIR>;
+
+wstring readED6_DIR(ED6_DIR &a)
+{
+    if (a.Index == -1)
+    {
+        return FileNameGetBaseW(GetFileNameW());
+    }
+    string str;
+    SPrintf(str, "DT%02X", a.Index);
+    return StringToWString(str);
+}
+
+/*******************************************************************************
+    for process start
+*******************************************************************************/
+typedef struct _ED6_DIR_GROUP(PTR32 addrDirEntryCountTable)
+{
+    local ULONG i;
+    PTR32       addr[ED6_DIR_FILE_COUNT_MAX];
+    if (FSeekHeap(addrDirEntryCountTable) != -1)
+    {
+        ULONG   count[ED6_DIR_FILE_COUNT_MAX];
+    }
+    else
+    {
+        local ULONG count[ED6_DIR_FILE_COUNT_MAX];
+        for (i = 0; i < ED6_DIR_FILE_COUNT_MAX; ++i)
+        {
+            count[i] = -1;
+        }
+    }
+    for (i = 0; i < ED6_DIR_FILE_COUNT_MAX; ++i)
+    {
+        if (addr[i] != 0 && count[i] != 0 && FSeekHeap(addr[i]) != -1)
+        {
+            ED6_DIR     dir(i, count[i]);
+        }
+        else
+        {
+            ED6_DIR     dir(i, 0) <hidden=true>;
+        }
+    }
+} ED6_DIR_GROUP <read=readED6_DIR_GROUP, size=sizeED6_DIR_GROUP>;
+
+wstring readED6_DIR_GROUP(ED6_DIR_GROUP &a)
+{
+    return L"ED6_DTXX.dir";
+}
+
+int sizeED6_DIR_GROUP(ED6_DIR_GROUP &a)
+{
+    return ED6_DIR_FILE_COUNT_MAX * sizeof(PTR32);
+}
+
+typedef struct _PED6_DIR
+{
+    PTR32   addr;
+    if (FSeekHeap(addr) != -1)
+    {
+        ED6_DIR dir(-1, -1);
+    }
+    FSeek(startof(this) + sizeof(addr));
+} PED6_DIR <optimize=false>;
+
+/*******************************************************************************
+    for process end
+*******************************************************************************/
+
+if (!IsProcess() && FTell() == 0)
+{
+    ED6_DIR dir(-1, -1) <open=true>;
+}
+
+#endif

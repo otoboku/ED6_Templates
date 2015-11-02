@@ -1,0 +1,250 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File: 零之轨迹 存档解析
+// Author:acgngca sinsyy
+// Revision:2011-11-11
+// Purpose:
+//--------------------------------------
+
+// 一些结构
+//-----------------------------------------------------------------------------------------------------------
+typedef int FileIndex;
+
+typedef struct  // 站位
+{
+    ubyte       x;  // 左下角为00，左右为x，上下为y
+    ubyte       y;
+} POSITION <read=readPosition>;
+
+string readPosition(POSITION &a)
+{
+    string s;
+    SPrintf(s,"%d %d", a.x, a.y);
+    return  s;
+};
+
+typedef struct
+{
+    ushort  Equip[5] <optimize=false>;
+} EQUIP;
+
+typedef struct
+{
+    ushort  SlotQuartz;
+    ubyte   SlotLevel;
+    FSkip(1);
+} SLOT;
+
+typedef struct
+{
+    SLOT    Slot[7] <optimize=false>;
+} ORBMENT;
+
+typedef struct
+{
+    ushort  Art[80] <optimize=false>;
+} ARTS;
+
+typedef struct
+{
+    ushort  Craft[15] <optimize=false>;
+} CRAFT;
+
+typedef struct
+{
+    ushort  SCraft[5] <optimize=false>;
+} SCRAFT;
+
+typedef struct
+{
+    ushort  itemIndex;
+    ubyte   amount;
+    FSkip(1);
+} ItemInBag;
+
+typedef struct
+{
+    FileIndex   MSFileIndex <format=hex>;
+    int         Par <format=hex>;
+} MonsterNote;
+
+typedef struct
+{
+    ubyte   FishedPlaceIndex[4];    // 最近钓得的地点
+    ushort  FishedTimes[50];        // 次数，取和，显示上限9999
+    uint64  BaitUsed <format=hex>;  // 所用鱼饵，标志位，从物品350开始到398结束，共8*3+16+8+1 = 49位
+    ubyte   ItemGet;    // 获得物品，最多四个，占标志位2345，全开1E或FF
+    FSkip(1);
+    ushort  SizeMax;    // 显示上限65535
+} FishNote;
+
+typedef struct
+{
+    ushort      CountBattle;
+    ushort      CountDie;
+    ushort      CountBattleWin;
+    FSkip(2);
+    ushort      CountBattleFlee;
+    ushort      CountBattleRestart;
+    ushort      CountSCraftUse;
+    ushort      CountSupportCraftUse;
+    ushort      CountBattlePartyAdvantage;
+    ushort      CountBattleEnemyAdvantage;
+    ushort      CountEnemyKilled;
+    FSkip(2);
+    ushort      InterruptDriveTimes;    // 打断驱动次数
+} BattleRecord;
+
+typedef struct  // 抗性
+{
+    uint    CONDITION_POISON            : 1;    // 毒
+    uint    CONDITION_FREEZE            : 1;    // 冻结 FROZEN
+    uint    CONDITION_PETRIFY           : 1;    // 石化 LANDIFICATION STONE
+    uint    CONDITION_SLEEP             : 1;    // 睡眠 SLEEPING
+    uint    CONDITION_DISABLE_ARTS      : 1;    // 封魔 MUTE
+    uint    CONDITION_BLIND             : 1;    // 黑暗 DARKNESS
+    uint    CONDITION_DISABLE_CRAFT     : 1;    // 封技 SEAL
+    uint    CONDITION_CONFUSE           : 1;    // 混乱 CHAOS
+    uint    CONDITION_FAINT             : 1;    // 气绝 STUN
+    uint    CONDITION_SECOND_KILL       : 1;    // 即死
+    uint    CONDITION_BURN              : 1;    // 炎伤
+    uint    CONDITION_RAGE              : 1;    // 愤怒
+    uint    CONDITION_ARTS_GUARD        : 1;    // ArtsGuard
+    uint    CONDITION_CRAFT_GUARD       : 1;    // CraftGuard
+    uint    CONDITION_MAX_GUARD         : 1;    // 墙 虚无领域 IMMUNE
+    uint    CONDITION_VANISH            : 1;    // Vanish
+    uint    CONDITION_STR_UP_DOWN       : 1;
+    uint    CONDITION_DEF_UP_DOWN       : 1;
+    uint    CONDITION_ATS_UP_DOWN       : 1;
+    uint    CONDITION_ADF_UP_DOWN       : 1;
+    uint    CONDITION_DEX_UP_DOWN       : 1;
+    uint    CONDITION_AGL_UP_DOWN       : 1;
+    uint    CONDITION_MOV_UP_DOWN       : 1;
+    uint    CONDITION_SPD_UP_DOWN       : 1;
+    uint    CONDITION_HP_RECOVERY       : 1;    // HP 按回合回复
+    uint    CONDITION_CP_RECOVERY       : 1;    // CP 按回合回复
+    uint    CONDITION_STEALTH           : 1;    // 隐身
+    uint    CONDITION_ARTS_REFLECT      : 1;    // 魔法反射
+    uint    CONDITION_Burning_Heart     : 1;    // 罗伊德燃烧之心第四个状态:全异常状态避免，n回合后气绝。包括vanish和fat，但fat的-20CP效果避免不了。
+    uint    CONDITION_unknown1          : 1;
+    uint    CONDITION_FAT               : 1;    // 变胖/变小
+    //  uint    CONDITION_CONDITION_GUARD   : 1;    // 全状态抵抗
+    uint    CONDITION_DEATH             : 1;    // 死亡 FORCE_SECOND_KILL //only valid in ASfile
+} RESISTANCE;
+
+typedef struct
+{
+    int                 HPMax;
+    int                 HP;
+    ushort              Level;
+    ushort              EPMax;
+    ushort              EP;
+    ushort              CP;
+    uint                EXP;
+    short               STR;
+    short               DEF;
+    short               ATS;
+    short               ADF;
+    short               DEX;
+    short               AGL;
+    short               MOV;
+    short               SPD;
+    short               DEXRate;
+    short               AGLRate;
+    ushort              CPMAX;
+    ubyte               DUMMY_STRUCT_01[2]  <hidden=true>;
+    ushort              RNG;        // 内存中改StatusBasic中的才有效
+    ubyte               DUMMY_STRUCT_02[2]  <hidden=true>;
+    RESISTANCE          condition;  // RESISTANCE类型，进程中有效; 战斗外包括存档中 DEATH有效
+} STATUS;
+
+typedef struct
+{
+    ubyte               DUMMY_STRUCT_01[20]  <hidden=true>;
+    ubyte               unknown;    //80不显示 0正面、1背面、3转圈...
+    //通常01 C1 20 41
+    ubyte               DUMMY_STRUCT_02[651]  <hidden=true>;
+} STATUS2;
+
+typedef struct
+{
+    ushort level;
+    ushort exp;
+} Masterquart;
+
+    FSeek(0x94);
+    STATUS      Status[12];// <optimize=false>;
+
+    // Equip    0x308
+    EQUIP       Equip[12];
+
+    ARTS        Arts[12];
+    CRAFT       Craft[12];
+    SCRAFT      SCraft[12];
+
+    // ORB  0xC68
+    ORBMENT     Orbment[12] <optimize=true>;
+
+    ItemInBag   itemInBag[3315] <optimize=true>;
+    //ubyte addPos2324;
+
+    FSeek(0x04B4C);
+    POSITION    Position[12] <optimize=true>;
+    //ubyte     DUMMY_STRUCT_021[160] <hidden=true>;
+    //STATUS2       characterDisplay[8];
+
+
+    FSeek(0x19C18);
+    int ScenaCode <format=hex>;     // 场景代码
+    int NOW_DP; // Detective Point
+    int NEXTLVDP;   // Detective Point
+    int NOW_DL; // Detective Level, 取值0-14, 对应等级为15-DL
+    int NEXTLVDL;   // Detective Point
+    int Mira;
+    FSkip(4);
+    int Medal;
+    FSkip(4);
+    int Sepith[7];
+    FSeek(0x19C74);
+    int ScenaNode;                  // 场景中的出入口代码，貌似都是从0x64开始的
+    int ChapterIndex;               // 章节代码，序章-3章-间章-4章-终章 0-3-4-5-6
+    int ScenaNameIndex;             // 场景名称代码
+    FSeek(0x19C84);
+    uint    TimeElapse; // 游戏运行时间s
+    uint    SaveTime;   // 存档保存时间s
+    FSkip(12);
+    uint    RecipeNote[3];  // 料理手册。 菜谱取得、大成功料理取得、预想外料理取得，全开FE FF FF 01(0x01FFFFFE)
+
+    FSeek(0x19CC0);
+    FishNote    fishNote[31] <optimize=true>;
+
+    FSeek(0x1AFE0);
+    ushort  Team[8];
+
+    FSeek(0x1B008);
+    ubyte           Flag[0x220] <format=hex>;
+
+    FSeek(0x1B210);
+    uint    JizoWorship;        // 地藏供奉, 8个提示+24个料理. FFFFFF3F
+
+    FSeek(0x1B334);
+    ubyte               Feelings[12];   // 好感度，位置[1][2][3]有效，对应人物代码排序：琪雅，大小姐，ＬＯＬＩ，基友，诺瓦尔，瓦吉？，莉夏，达德利？伊利亚，塞西尔，弗兰，秀丽
+    ushort              SBreak[12];     // S爆发技设定
+    ushort              Replace[12];    // 替换形象，人物代码
+    MonsterNote         monsterNote[305];   // 怪物手册，暴力全开：t_mons._dt复制到这，参数改为全F(0x7FFFFF04足矣)
+
+    FSeek(0x1F36D);
+    enum <ubyte> DIFFICULTY { Normal = 0, Hard, Nightmare, Easy } Difficulty;
+    ////ubyte           Difficulty;     // 00 Normal 01 Hard 02 Nightmare 03 Easy
+    ubyte               DUMMY_STRUCT_07[10] <hidden=true>;
+    BattleRecord        battleRecord;
+
+    FSeek(0x1F3E8);
+    ushort              CCraftUsedTimes[12];    // 与特定人组合战技使用次数
+
+    FSeek(0x1F454);
+    uint64              Record <format=hex>;    // 48个标志位，全成就6个F
+
+    FSeek(0x1F640);
+    Masterquart         mMasterquart[22]; //主回路等级和经验（0500f41a)满

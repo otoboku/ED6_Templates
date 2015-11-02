@@ -1,0 +1,111 @@
+//--------------------------------------
+//--- 010 Editor v4.0.4 Binary Template
+//
+// File:
+// Author: sinsyy acgngca
+// Revision:
+// Purpose:
+//--------------------------------------
+
+#include "ED6_common.bt.h"
+
+// 核心回路定义 部分
+//-----------------------------------------------------------------------------------------------------------
+string MasterQuartzIndex2Name(ulong index)
+{
+    local string  all = "力量盾牌妖精利爪白金幻象战斧法则羽翼神佑王权魅影守护无限小丑罪恶草剃纹章灵猫骑士贤者草剃";
+    if (index >= MasterQuartzCount)
+        return "nul \t";
+    //return SubStr(all, index*4, 4);
+    string s;
+    SPrintf(s, "0x%X %s", 0xDC+index, SubStr(all, index*4, 4));
+    return s;
+}
+
+typedef struct _MasterQuartzLv
+{
+    //注除HP,SPD外, 其它*10
+    ushort  HP_up;
+    ubyte   EP_up;  
+    ubyte   STR_up;
+    ubyte   DEF_up;
+    ubyte   ATS_up;
+    ubyte   ADF_up;
+    ubyte   SPD_up;
+    ubyte   Effect1ST;      // 回合数
+    ubyte   Effect1Rate;    // 增加比率
+    ubyte   Effect2ST;      // 回合数
+    ubyte   Effect2Rate;    // 增加比率
+    ushort  MasterArt;      // 核心魔法
+    ubyte   IntroIndex[6];  // 6行文字显示索引, 与下面MMintro数组索引对应
+
+    local uint  addrTemp = FTell();
+
+    local   uint i, addrIntroReal[6];
+    for (i=0; i<6; i++)
+    {
+        addrIntroReal[i] = parentof(parentof(this)).addrIntro[IntroIndex[i]] + addrT_mstqrt;
+        FSeek(addrIntroReal[i]);
+        String Intro;
+    }
+    FSeek(addrTemp);
+
+} MasterQuartzLv <read=readMasterQuartzLv,write=writeMasterQuartzLv>;
+
+string readMasterQuartzLv(MasterQuartzLv &a)
+{
+    string s;
+    SPrintf(s, "%d %d %d %d %d", a.Effect1ST, a.Effect1Rate, a.Effect2ST, a.Effect2Rate, a.MasterArt);
+    return s;
+}
+
+void writeMasterQuartzLv(MasterQuartzLv &a, string s) {;}
+
+
+typedef struct(int parMasterQuartz)// _MasterQuartz
+{
+    local uint index;
+    for (index=0; index<5; index++)
+    {
+        MasterQuartzLv masterQuartzLv;
+    }
+
+    index = parMasterQuartz;   
+} MasterQuartz <read=readMasterQuartz,write=writeMasterQuartz>;
+
+string readMasterQuartz(MasterQuartz &a)
+{
+    //return MasterQuartzIndex2Name((startof(a) - addrT_mstqrt)/sizeof(MasterQuartz));
+    return MasterQuartzIndex2Name(a.index);
+}
+
+void writeMasterQuartz(MasterQuartz &a, string s) {;}
+
+typedef struct
+{
+    FSeek(addrT_mstqrt + 0x64*MasterQuartzCount);
+    ushort addrIntro[0xFF] <hidden=true>;
+
+    FSeek(addrT_mstqrt);
+    local int i;
+    for (i=0; i<MasterQuartzCount; i++)
+    {
+        MasterQuartz masterQuartz(i);
+    }
+} T_mstqrt <read=readT_mstqrt>;
+
+string readT_mstqrt(T_mstqrt &a)
+{
+    return  "核心回路";
+}
+
+if (!IsProcess())
+{
+    local uint addrT_mstqrt = 0;
+}
+
+local uint MasterQuartzCount = 0x16;
+//#include "ao_t_mstqrt.bt"
+FSeek(addrT_mstqrt);
+T_mstqrt         masterQuartzTable;
+

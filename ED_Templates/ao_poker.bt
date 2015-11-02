@@ -1,0 +1,38 @@
+//--------------------------------------
+//--- 010 Editor v4.0.4 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+#include "ED6_common.bt.h"
+
+typedef struct // 0x4C
+{
+    DUMMY_STRUCT(6);
+    ushort  IsUsed;
+    DUMMY_STRUCT(4); // 0xC
+    ushort  digit;
+    DUMMY_STRUCT(0x3E);
+} POKER_ENTRY <read=readPOKER_ENTRY, write=writePOKER_ENTRY>;
+void writePOKER_ENTRY(POKER_ENTRY &a, string s) {;}
+
+string readPOKER_ENTRY(POKER_ENTRY &a)
+{
+    string s;
+    SPrintf(s, "%d %d %d", a.IsUsed, (a.digit-1)/13, (a.digit-1)%13 + 1);
+    return s;
+}
+
+typedef struct
+{
+    local int i;
+    for (i=0; i<0x34 + 16; i++)
+        POKER_ENTRY entry;
+} POKER;
+
+FSeek(ProcessHeapToLocalAddress(0x5D02984));
+POKER poker;
+
+//黑桃0 方片1 梅花2 红桃3

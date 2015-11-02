@@ -1,0 +1,30 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Script File
+//
+// File:
+// Author:
+// Revision:2015.07.26
+// Purpose:
+//--------------------------------------
+int64 addrHeap;
+int64 addrLocal;
+
+if(GetSelSize() > 0)
+    addrLocal = GetSelStart();
+else
+    addrLocal = GetCursorPos();
+
+if (IsProcess())
+{
+    addrHeap = ProcessLocalToHeapAddress(addrLocal);
+}
+else
+{
+    addrHeap = addrLocal;
+}
+
+Printf("%LX", addrHeap);
+
+string temp;
+SPrintf(temp, "%LX", addrHeap);
+CopyStringToClipboard(temp);

@@ -1,0 +1,152 @@
+//--------------------------------------
+//--- 010 Editor v6.0.1 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+#include "010_def.bt.h"
+
+typedef struct(int par)
+{
+    local string    _str_;
+    if (par == 1)
+    {
+        local ubyte switchType = ReadUByte(startof(this) + 4);
+
+        ArrayBytes  data(0x24);
+        if (switchType == 18)
+        {
+            local string    TypeName = "回路";
+            FSkip(-0x24);
+            ushort  Index <format=hex>;
+            ushort  Category;
+            ubyte   Type;
+            ubyte   Effect1;
+            ubyte   QuartzType;         // 0x6
+            ubyte   unknown1;
+            ubyte   unknown2;
+            ubyte   Level;
+            short   RNG;
+            short   Probability;        // 0xC
+            short   HP_EP_STR;
+            short   DEF;
+            short   ATS;
+            short   ADF;
+            short   DEX;
+            short   AGL;
+            short   MOV;
+            short   SPD;
+            short   MaxAmount;
+            uint    Price;
+        }
+    }
+    else if (par == 0)
+    {
+        ubyte   dummy;      // 去掉 WARNING Line xx: Empty structure.
+    }
+} T_item_entry <read=readT_item_entry, write=writeT_item_entry>;
+
+string readT_item_entry(T_item_entry &a)
+{
+    if (exists(a.data.data))
+    {
+        return ReadArrayBytes(a.data);
+    }
+    return "";
+}
+
+void writeT_item_entry(T_item_entry &a, string s) {};
+
+typedef struct
+{
+    local uint  addrFileBase    = FTell();
+
+    local int   i = 0, j = 0, k = 0;
+    local int   itemIndexMax = 9999;
+    local uint  addrTemp, addrK;
+
+    while(1)
+    {
+        addrTemp = FTell();
+        addrK = ReadUShort(FTell()) + addrFileBase;
+        k = ReadUShort(addrK);
+
+        if (k >= itemIndexMax || i >= itemIndexMax)
+        {
+            break;
+        }
+        else if (k == i)
+        {
+            FSeek(addrK);
+            T_item_entry    item_entry(1);
+            i++;
+            FSeek(addrTemp + 2);
+        }
+        else if (k < i)
+        {
+            Warning("T_item: Reverse index %d met at pos 0x%X, 0x%X.", k, addrTemp, addrK);
+            Printf("T_item: Reverse index %d met at pos 0x%X, 0x%X.\n", k, addrTemp, addrK);
+            FSeek(addrK);
+            T_item_entry item_entry_reverse(1);
+            //i++;
+            FSeek(addrTemp + 2);
+        }
+        else
+        {
+            for (j = i; j < k; j++)
+            {
+                FSeek(addrFileBase);
+                T_item_entry    item_entry(0) <hidden=true>;
+                i++;
+            }
+            FSeek(addrK);
+            T_item_entry    item_entry(1);
+            i++;
+            FSeek(addrTemp + 2);
+        }
+    }
+} T_item <read=readT_item, size=sizeT_item>;
+
+wstring readT_item(T_item &a)
+{
+    return L"物品效果";
+}
+
+int sizeT_item(T_item &a)
+{
+    return ReadUShort(startof(a));
+}
+
+if (!IsProcess() && FTell() == 0)
+{
+    T_item  itemTable <open=true>;
+}
+
+/* T_ITEM_3rd_DT22_物品效果.bt
+typedef struct  //一组 36字节
+{
+    ushort  Index <format=hex>;
+    ushort  Category;
+    ubyte   Icon;
+    ubyte   Effect1;
+    ubyte   Effect2;
+    ubyte   DUMMY_STRUCT_02;    //0x08
+    ubyte   ATT;
+    ubyte   DisplayIndex;
+    ushort  RNG;
+    ushort  ScopeRadius;
+    ushort  STR;    //Effect1
+    ushort  DEF;
+    ushort  ATS;    //Effect2
+    ushort  ADF;
+    ushort  DEX;
+    ushort  AGL;
+    ushort  MOV;
+    ushort  SPD;
+    ushort  Discardable;
+    ushort  Price;
+    ushort  DUMMY_STRUCT_03;
+} ITEM;
+*/

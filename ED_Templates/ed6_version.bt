@@ -1,0 +1,104 @@
+//--------------------------------------
+//--- 010 Editor v6.0.3 Binary Template
+//
+// File: ed6_version.bt
+// Author: acgngca
+// Revision: 2015-10-28
+// Purpose: to get game version
+//--------------------------------------
+#ifndef _ed6_version_bt_
+#define _ed6_version_bt_
+
+#include "010_def.bt.h"
+
+enum GameVersion
+{
+    ed6VersionUnknown = 0,
+    ed61min = 0x10000,
+    ed61cn7,
+    ed61jp7,
+    ed61steam = 0x11000,
+    ed61steam150820,
+
+    ed62min = 0x20000,
+    ed62cn7,
+    ed62jp7,
+    ed62jp1020,
+    ed62cn1020fc,
+    ed62cn1020fcli,
+    ed62steam = 0x21000,
+    ed62steam151029,
+
+    ed63min = 0x40000,
+    ed63cn7,
+    ed63jp7,
+    ed63jp1002,
+    ed63steam,
+};
+
+GameVersion getGameVersion()
+{
+    local GameVersion gameVersion;
+
+    if (ReadHeapUInt(0x401C93) == 0x672828 && ReadHeapUInt(0x4A01F2) == 0x2DED814)
+    {
+        gameVersion = ed63cn7;
+    }
+    else if (ReadHeapUInt(0x00401C33) == 0x60EF38 && ReadHeapUInt(0x004C6342) == 0x2F2B9F8)
+    {
+        gameVersion = ed62cn7;
+    }
+    else if (ReadHeapUInt(0x004019FF) == 0x5A58D0 && ReadHeapUInt(0x004A8492) == 0x1941780)
+    {
+        gameVersion = ed61cn7;
+    }
+    else if (ReadHeapUInt(0x00401C93) == 0x66E780 && ReadHeapUInt(0x0049F6F2) == 0x2DEADD0)
+    {
+        gameVersion = ed63jp7;
+    }
+    else if (ReadHeapUInt(0x00401C33) == 0x60EDD8 && ReadHeapUInt(0x004C5E92) == 0x2F2CDD8)
+    {
+        gameVersion = ed62jp7;
+    }
+    else if (ReadHeapUInt(0x004019FF) == 0x5A8370 && ReadHeapUInt(0x004A8442) == 0x1944220)
+    {
+        gameVersion = ed61jp7;
+    }
+    else if (ReadHeapUInt(0x00401C93) == 0x66E640 && ReadHeapUInt(0x0049F4C2) == 0x2DE9338)
+    {
+        gameVersion = ed63jp1002;
+    }
+    else if (ReadHeapUInt(0x00401C36) == 0x60DC98 && ReadHeapUInt(0x004C5992) == 0x2F2A338)
+    {
+        gameVersion = ed62jp1020;
+    }
+    else if (ReadHeapUInt(0x00401C1A) == 0x612040 && ReadHeapUInt(0x004A4AF2) == 0x57FB10)
+    {
+        gameVersion = ed61steam150820;
+    }
+    else if (ReadHeapUInt(0x00402148) == 0x694C40 && ReadHeapUInt(0x004D6362) == 0x5D8DC0)
+    {
+        gameVersion = ed62steam151029;
+    }
+    else
+    {
+        gameVersion = ed6VersionUnknown;
+    }
+
+    return gameVersion;
+}
+
+local GameVersion   g_GameVersion = getGameVersion();
+if (g_GameVersion != ed6VersionUnknown)
+{
+    Printf("ED6 version is: %s\r\n", EnumToString(g_GameVersion));
+}
+
+/*
+if (g_GameVersion == ed6VersionUnknown)
+{
+    Printf("Exit: ED6 version unknown!\r\n");
+    return -1;
+}*/
+
+#endif

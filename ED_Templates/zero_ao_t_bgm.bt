@@ -1,0 +1,28 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+
+typedef struct
+{
+    uint       loopStart;  // Sample
+    uint       loopLength;   
+    ushort      fileName;
+    ubyte       DUMMY_STRUCT_01[2] <hidden=true>;    
+    ushort      index;
+    ushort      isLoop; // 1 loop 0 not.loop
+} BGM <read=readBGMIndex>;
+
+string readBGMIndex(BGM &a)
+{
+    string strIndex;
+    SPrintf(strIndex,"%d",a.index);
+    return strIndex;
+}
+   
+    while(!FEof())
+        BGM bgm;

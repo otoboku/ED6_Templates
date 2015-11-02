@@ -1,0 +1,137 @@
+#include "010_def.bt.h"
+
+int64 GetExeImageBase()
+{
+    local INT       i;
+    for (i = 0; i < ProcessGetNumHeaps(); ++i)
+    {
+        if (ProcessGetHeapModule(i) != L"")
+        {
+            return ProcessGetHeapStartAddress(i);
+        }
+    }
+    return -1;
+}
+
+//  CalcSizeOfImageByName
+INT CalcSizeOfImage(int64 ImageBase)
+{
+    local INT       i;
+    local INT       count = ProcessGetNumHeaps();
+    local wstring   module_name;
+    local INT       module_size = 0;
+    for (i = 0; i < count; ++i)
+    {
+        if(ProcessGetHeapStartAddress(i) == ImageBase)
+        {
+            module_name = ProcessGetHeapModule(i);
+            module_size = ProcessGetHeapSize(i);
+            break;
+        }
+        else if (ProcessGetHeapStartAddress(i) > ImageBase)
+        {
+            return module_size;
+        }
+    }
+    if (module_size == 0)
+    {
+        return module_size;
+    }
+    for (++i; i < count; ++i)
+    {
+        if (ProcessGetHeapModule(i) != module_name)
+        {
+            break;
+        }
+        module_size += ProcessGetHeapSize(i);
+    }
+    return module_size;
+}
+
+/* May mistake unallocated
+INT CalcSizeOfImageByContinuous(int64 ImageBase)
+{
+    local INT       i;
+    local INT       count = ProcessGetNumHeaps();
+    local INT       module_size = 0;
+    for (i = 0; i < count; ++i)
+    {
+        if(ProcessGetHeapStartAddress(i) == ImageBase)
+        {
+            module_size = ProcessGetHeapSize(i);
+            break;
+        }
+        else if (ProcessGetHeapStartAddress(i) > ImageBase)
+        {
+            return module_size;
+        }
+    }
+    if (module_size == 0)
+    {
+        return module_size;
+    }
+    for (++i; i < count; ++i)
+    {
+        if (ProcessGetHeapStartAddress(i) != ImageBase + module_size)
+        {
+            break;
+        }
+        module_size += ProcessGetHeapSize(i);
+    }
+    return module_size;
+}*/
+
+INT ReadSizeOfImage(int64 ImageBase)
+{
+    local int64 addr = ProcessHeapToLocalAddress(ImageBase);
+    if (ReadUShort(addr) != 0x5A4D)
+    {
+        return 0;
+    }
+    return ReadInt(addr + ReadInt(addr + 0x3C) + 0x50);
+}
+
+#define GetSizeofImage  ReadSizeOfImage
+
+Printf("CalcSizeOfImage: 0x%X\n", CalcSizeOfImage(GetExeImageBase()));
+Printf("ReadSizeOfImage: 0x%X\n", ReadSizeOfImage(GetExeImageBase()));
+
+local ULONG count = ProcessGetNumHeaps();
+local ULONG i;
+local ULONG ImageBase = GetExeImageBase();
+local ULONG SizeOfImage = GetSizeofImage(ImageBase);
+local wstring wstr;
+for (i = 0; i < count; ++i)
+{
+    if (0)
+    {
+        wstr = ProcessGetHeapModule(i);
+        if (wstr != L"")
+        {
+            Printf("%s\t%x\t%x\t%x\n", wstr, ProcessGetHeapStartAddress(i), ProcessGetHeapLocalAddress(i), ProcessGetHeapSize(i));
+        }
+    }
+    if (0 && ProcessGetHeapStartAddress(i) > ImageBase)
+    {
+        Printf("%s\t%x\t%x\t%x\n", ProcessGetHeapModule(i), ProcessGetHeapStartAddress(i), ProcessGetHeapLocalAddress(i), ProcessGetHeapSize(i));
+        ImageBase = ProcessGetHeapStartAddress(i);
+        SizeOfImage = ProcessGetHeapSize(i);
+        break;
+    }
+}
+
+Printf("%s\n", GetFileNameW());
+
+Printf("ImageBase: 0x%X\n", ImageBase);
+Printf("SizeOfImage: 0x%X\n", SizeOfImage);
+
+Printf("0x%X\n", FindFirst("83 C4 10 89 3C B5,h", true, false, FINDMETHOD_WILDCARDS, 0, 1, 0x401000, 0x400000));
+return;
+
+if (FSeekHeap(ImageBase) != -1)
+{
+    local TFindResults r = FindAll("83 C4 10 89 3C B5,h", true, false, FINDMETHOD_WILDCARDS, 0, 1, ProcessHeapToLocalAddress(ImageBase), SizeOfImage);
+    Printf( "%d\n", r.count );
+    for( i = 0; i < r.count; i++ )
+        Printf( "0x%LX %Ld\n", ProcessLocalToHeapAddress(r.start[i]), r.size[i] );
+}

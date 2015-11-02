@@ -1,0 +1,36 @@
+//--------------------------------------
+//--- 010 Editor v4.0.4 Binary Template
+//
+// File:
+// Author: acgngca
+// Revision:
+// Purpose:
+//--------------------------------------
+
+#include "ED6_common.bt.h"
+
+typedef struct
+{
+    local int       i = 0;
+    ushort          TOTAL <hidden=true>;
+    ushort          addr[TOTAL] <hidden=true>;
+    for (i = 0; i < TOTAL; i++)
+    {
+        FSeek(addr[i] + addrT_town);
+        String   place;
+    }
+} T_town <read=readT_town>;
+
+string readT_town(T_town &a)
+{
+    return  "地点列表";
+}
+
+if (!IsProcess())
+{
+    local uint addrT_town = 0;
+}
+
+//#include "zero_ao_t_town.bt"
+FSeek(addrT_town);
+T_town      placeTable;

@@ -1,0 +1,67 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:
+// Author:
+// Revision: 2015.09.04
+// Purpose:
+//--------------------------------------
+#ifndef ED_VERSION
+#define ED6_SC
+#endif
+#include "ED6_common.bt.h"
+
+typedef struct (int addrParent, int index)  // 0xC
+{
+    ArrayBytes  data(0x24);
+} T_item_entry <read=readT_item_entry, write=writeT_item_entry>;
+
+string readT_item_entry(T_item_entry &a)
+{
+    return  ReadArrayBytes(a.data);
+}
+
+void writeT_item_entry(T_item_entry &a, string s)
+{
+    // 复制用
+}
+
+typedef struct
+{
+    local uint  addrFileBase = FTell();
+
+    if (ReadUShort(addrFileBase) <= ReadUShort(addrFileBase + 2))
+    {
+        local ushort    TOTAL = ReadUShort(addrFileBase) / 2;
+    }
+    else
+    {
+        local ushort    TOTAL = 0x848 / 2;
+    }
+
+    local int       i;
+    ushort          addr[TOTAL];    // entry 地址
+
+    for (i = 0; i < TOTAL; ++i)
+    {
+
+        FSeek(addr[i] + addrFileBase);   // 跳转
+        T_item_entry   item_entry(addrFileBase, i);
+    }
+
+} T_item <read=readT_item, size=sizeT_item>;
+
+wstring readT_item(T_item &a)
+{
+    return L"物品效果";
+}
+
+int sizeT_item(T_item &a)
+{
+    return ReadUShort(startof(a));
+}
+
+if (!IsProcess() && FTell() == 0)
+{
+    T_item  itemTable <open=true>;
+}

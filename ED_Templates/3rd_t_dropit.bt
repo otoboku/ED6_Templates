@@ -1,0 +1,46 @@
+//--------------------------------------
+//--- 010 Editor v4.0 Binary Template
+//
+// File:T_dropit._DT
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+typedef struct
+{
+    ushort  index;
+    ushort  unknown <hidden=true>;
+    if (unknown != 0)
+        Printf("%d\r\n", FTell());
+    ushort  item[8];
+    byte    probability[8];
+} DropItem <read=readDropItem,write=writeDropItem>;
+
+string readDropItem(DropItem &a)
+{
+    string  s;
+    SPrintf(s, "%d", a.index);
+    return  s;
+}
+
+void writeDropItem(DropItem &a, string s) {};
+
+typedef struct
+{
+    local int   total = 0;
+    while (FTell() <= FileSize() - 28 && ReadUShort(FTell()) < 9999)
+    {
+        DropItem    dropItem;
+        total++;
+    }
+} T_dropit <read=readT_dropit, size=8>;
+
+wstring readT_dropit(T_dropit &a)
+{
+    return  L"掉落物分组";
+}
+
+if (!IsProcess() && FTell() == 0)
+{
+    T_dropit    dropItemTable <open=true>;
+}

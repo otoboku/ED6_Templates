@@ -1,0 +1,54 @@
+//-----------------------------------
+//--- 010 Editor v1.0 Script File
+//
+// File: 零之轨迹 添加存档校验
+// Author:acgngca
+// Revision: 2011-11-11
+// Purpose:
+//
+//  http://tieba.baidu.com/p/1201438661
+//  文件最后两个双字中，前一个是双字和，后一个是负的（不包括校验的）双字数减去双字和，对系统档也适用。
+//  双字和  双字数*(-1)-双字和
+//-----------------------------------
+
+// Define variables
+quad  pos = 0;
+int   sum1 = 0, sum2 = 0;
+
+// Check that a file is open
+if( FileCount() == 0 )
+{
+    MessageBox( idOk, "error", "No file is opened." );
+    return -1;
+}
+
+// Check that is ed_zero savedata
+if( FileSize() != 25FE8h && FileSize() != 50Ch && FileSize() != 2643Ch)
+{
+    MessageBox( idOk, "error", "Not ed_zero/ed_ao savedata." );
+    return -1;
+}
+
+
+while( pos < FileSize()-8 )
+{
+    sum2--;
+    sum1 += ReadInt(pos);
+    pos += 4;
+}
+
+sum2 -= sum1;
+
+if( sum1 == ReadInt(pos) && sum2 == ReadInt(pos+4) )
+{
+    // MessageBox( idOk, "ok", "No set is needed" );
+    Printf("No set is needed\n");
+    return -1;
+}
+
+WriteInt(pos,sum1);
+WriteInt(pos+4,sum2);
+FileSave();
+
+// MessageBox( idOk, "ok", "set ok" );
+Printf("set ok\n");

@@ -1,0 +1,102 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File: 空之轨迹 3rd t_ittxt._dt t_ittxt2._dt Template
+// Author:acgngca
+// Revision:2015-10-12
+// Purpose:查看、修改物品名称和说明
+// Readme:任何改变文件大小的操作均不可以进行，除非你已经明晰本文件的格式
+//
+//--------------------------------------
+#include "010_def.bt.h"
+
+typedef struct(int par)
+{
+    if (par == 1)
+    {
+        ushort  Index;
+        DUMMY_STRUCT(2);
+        FHPSTR  ItemName;
+        FHPSTR  ItemIntro;
+    }
+    else if (par == 0)
+    {
+        ubyte   dummy;      // 去掉 WARNING Line xx: Empty structure.
+    }
+} T_ittxt_entry <read=readT_ittxt_entry,write=writeT_ittxt_entry>;
+
+string readT_ittxt_entry(T_ittxt_entry &a)
+{
+    if (exists(a.ItemName.str))
+    {
+        return a.ItemName.str;
+    }
+    return "";
+}
+
+void writeT_ittxt_entry(T_ittxt_entry &a, string s) {};
+
+typedef struct
+{
+    local uint  addrFileBase    = FTell();
+
+    local int   i = 0, j = 0, k = 0;
+    local int   itemIndexMax = 9999;
+    local uint  addrTemp, addrK;
+
+    while(1)
+    {
+        addrTemp = FTell();
+        addrK = ReadUShort(FTell()) + addrFileBase;
+        k = ReadUShort(addrK);
+
+        if (k >= itemIndexMax || i >= itemIndexMax)
+        {
+            break;
+        }
+        else if (k == i)
+        {
+            FSeek(addrK);
+            T_ittxt_entry ittxt_entry(1);
+            i++;
+            FSeek(addrTemp + 2);
+        }
+        else if (k < i)
+        {
+            Warning("T_ittxt: Reverse index %d met at pos 0x%X, 0x%X.", k, addrTemp, addrK);
+            Printf("T_ittxt: Reverse index %d met at pos 0x%X, 0x%X.\n", k, addrTemp, addrK);
+            FSeek(addrK);
+            T_ittxt_entry ittxt_entry_reverse(1);
+            //i++;
+            FSeek(addrTemp + 2);
+        }
+        else
+        {
+            for (j = i; j < k; j++)
+            {
+                FSeek(addrFileBase);
+                T_ittxt_entry ittxt_entry(0) <hidden=true>;
+                i++;
+            }
+            FSeek(addrK);
+            T_ittxt_entry ittxt_entry(1);
+            i++;
+            FSeek(addrTemp + 2);
+        }
+    }
+} T_ittxt <read=readT_ittxt, size=sizeT_ittxt>;
+
+wstring readT_ittxt(T_ittxt &a)
+{
+    return L"物品说明";
+}
+
+int sizeT_ittxt(T_ittxt &a)
+{
+    return ReadUShort(startof(a));
+}
+
+if (!IsProcess() && FTell() == 0)
+{
+    T_ittxt  ittxtTable <open=true>;
+}

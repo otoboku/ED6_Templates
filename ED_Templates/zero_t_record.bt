@@ -1,0 +1,55 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+// 成就列表
+//-----------------------------------------------------------------------------------------------------------
+typedef struct
+{
+    ubyte       DisplayPar; // 显示参数, 01 未达成前不显示名称, 02 未达成前不显示介绍
+    ubyte       pt;
+    ushort      Count;  // 达成条件，数量
+    ushort      DisplayIndex;
+    FSkip(2);
+    ushort      addrRecordName;
+    ushort      addrRecordIntro;
+    local uint  addrRecordNameReal = addrRecordName + addrT_record;
+    local uint  addrRecordIntroReal = addrRecordIntro + addrT_record;
+    local uint  addrTemp = FTell();
+    FSeek(addrRecordNameReal);      // 跳转
+    string  RecordName;
+    FSeek(addrRecordIntroReal);     // 跳转
+    string  RecordIntro;
+    FSeek(addrTemp);
+} RECORD <read=readRecordName,write=writeRecordName>;
+
+string readRecordName(RECORD &a)
+{
+    string s;
+    SPrintf(s,"%04d ",a.Count);
+    return  s + a.RecordName;
+}
+
+void writeRecordName(RECORD &a, string s)
+{
+    // 复制用
+};
+
+typedef struct
+{
+    RECORD  Record[48] <optimize=false>;
+} T_record <read=readT_record>;
+
+string readT_record(T_record &a)
+{
+    return  "成就列表";
+}
+
+    local uint addrT_record = 0;
+    // 成就列表
+    FSeek(addrT_record);
+    T_record        recordTable;

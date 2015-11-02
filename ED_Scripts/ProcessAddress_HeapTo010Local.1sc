@@ -1,0 +1,38 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Script File
+//
+// File:
+// Author:
+// Revision:2015.07.26
+// Purpose:
+//--------------------------------------
+int64 addrHeap;
+int64 addrLocal;
+string input = InputString("input address", "hex:", "");
+
+SScanf(input, "%LX", addrHeap);
+
+if (input == "")
+{
+    Printf("no input!\n");
+    return;
+}
+
+if (IsProcess())
+{
+    addrLocal = ProcessHeapToLocalAddress(addrHeap);
+}
+else
+{
+    addrLocal = addrHeap;
+}
+
+if (addrLocal > -1 && addrLocal <= FileSize())
+{
+    SetCursorPos(addrLocal);
+}
+else
+{
+    Printf("no access or invalid address!\n");
+}
+Printf("0x%LX", addrLocal);

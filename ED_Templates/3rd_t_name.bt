@@ -1,0 +1,271 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File: 3rd_t_name.bt
+// Author: acgngca
+// Revision: 2015-10-30
+// Purpose: to parse sc/3rd t_name
+//--------------------------------------
+#ifndef ED_VERSION
+#define ED6_3RD
+#endif
+#include "ED6_common.bt.h"
+
+typedef struct(int par) // 0x22 bytes
+{
+    if (par == 1)
+    {
+        ushort      ChrIndex <fgcolor=cBlue>;
+        FSkip(2);
+        FileIndex   CHFileIndex[4] <optimize=false>;
+        FileIndex   MSFileIndex;
+        FileIndex   unknown;
+    #ifndef ED6_FC
+        FileIndex   CHFileIndexST;  // STATUS里显示的头像
+    #endif
+        FHPSTR      ChrName;
+    }
+    else if (par == 0)
+    {
+        ubyte       dummy;      // 去掉 WARNING Line xx: Empty structure.
+    }
+} T_name_entry <read=readT_name_entry, write=writeT_name_entry>;
+
+string readT_name_entry(T_name_entry &a)
+{
+    if (exists(a.ChrName.str))
+    {
+        return a.ChrName.str;
+    }
+    return  "";
+}
+void writeT_name_entry(T_name_entry &a, string s) {};
+
+typedef struct
+{
+    local UINT  addrFileBase = FTell();
+    local int   i = 0, j = 0, k = 0;
+    local uint  addrTemp, addrK;
+#ifndef ED6_FC
+    local int   characterIndexMax = 2999;
+    ushort      addr2000 <hidden=true>;
+#else
+    local int   characterIndexMax = 999;
+#endif
+
+    while(1)
+    {
+        addrTemp = FTell();
+        addrK = ReadUShort(FTell()) + addrFileBase;
+        k = ReadUShort(addrK);
+
+        if (k > characterIndexMax || i > characterIndexMax)
+        {
+            break;
+        }
+        else if (k == i)
+        {
+            FSeek(addrK);
+            T_name_entry   character(1);
+            i++;
+            FSeek(addrTemp + 2);
+        }
+        else if (k < i)
+        {
+            Warning("T_name: Reverse index %d met at pos 0x%X, 0x%X.", k, addrTemp, addrK);
+            Printf("T_name: Reverse index %d met at pos 0x%X, 0x%X.\n", k, addrTemp, addrK);
+            FSeek(addrK);
+            T_name_entry   character_reverse(1);
+            //i++;
+            FSeek(addrTemp + 2);
+        }
+        else
+        {
+            for (j = i; j < k; j++)
+            {
+                FSeek(addrFileBase);
+                T_name_entry   character(0) <hidden=true>;
+                i++;
+            }
+            FSeek(addrK);
+            T_name_entry   character(1);
+            i++;
+            FSeek(addrTemp + 2);
+        }
+    }
+} T_name <read=readT_name, size=sizeT_name>;
+
+wstring readT_name(T_name &a)
+{
+    return  L"角色列表";
+}
+
+int sizeT_name(T_name &a)
+{
+    return ReadUShort(startof(a));
+}
+
+if (!IsProcess() && FTell() == 0)
+{
+    T_name  characterTable <open=true>;
+}
+
+
+
+
+/* 不能处理乱序
+    while(ReadUShort(FTell()) != 999 && i < 1000)
+    {
+        if (ReadUShort(FTell()) == i)
+        {
+            CHARACTER   character(1);
+            i++;
+        }
+        else if (ReadUShort(FTell()) < i)
+        {
+            FSkip(0x14);
+        }
+        else
+        {
+            addrTemp = FTell();
+            FSeek(addrT_name);
+            CHARACTER   character(0) <hidden=true>;
+            i++;
+            FSeek(addrTemp);
+        }
+*/
+
+
+// 效率太低，还是按默认顺序写来吧... 不再处理乱序
+/*
+typedef struct
+{
+    local int   characterIndex = 0;
+    local int   characterCount0 = 200;  // 0-999 个数
+    local int   characterIndexMax0 = 0; // 0-999 最大编号
+    local int   characterCount2 = 200;  // 2000-2999 个数
+    local int   characterIndexMax2 = 0; // 2000-2999 最大编号
+    local int   i = 0, isExist = 0;
+    ushort      addr2000;
+
+    // 确定0-999的最大编号、尝试确定个数
+    i = 0, isExist = 0;
+    FSeek(addrT_name + 2);
+    while (i < characterCount0)
+    {
+        if (ReadUShort(ReadUShort(FTell()) + addrT_name) >= 999)
+        {
+            isExist = 1;
+            break;
+        }
+        else
+        {
+            if (ReadUShort(ReadUShort(FTell()) + addrT_name) > characterIndexMax0)
+            {
+                characterIndexMax0 = ReadUShort(ReadUShort(FTell()) + addrT_name);
+            }
+            FSkip(0x2);
+            i++;
+        }
+    }
+
+    if (isExist == 1)
+    {
+        characterCount0 = i - 1;
+    }
+
+    // 确定2000-2999的最大编号、尝试确定个数
+    i = 0, isExist = 0;
+    FSeek(addrT_name + addr2000);
+    while (i < characterCount2)
+    {
+        if (ReadUShort(ReadUShort(FTell()) + addrT_name) >= 2999)
+        {
+            isExist = 1;
+            break;
+        }
+        else
+        {
+            if (ReadUShort(ReadUShort(FTell()) + addrT_name) > characterIndexMax2)
+            {
+                characterIndexMax2 = ReadUShort(ReadUShort(FTell()) + addrT_name);
+            }
+            FSkip(0x2);
+            i++;
+        }
+    }
+
+    if (isExist == 1)
+    {
+        characterCount2 = i - 1;
+    }
+
+    // 装入数组
+    for (characterIndex = 0; characterIndex <= characterIndexMax0; characterIndex++)
+    {
+        i = 0, isExist = 0;
+        FSeek(addrT_name + 2);
+        while (ReadUShort(ReadUShort(FTell()) + addrT_name) < 999 && i <= characterCount0)
+        {
+            if (ReadUShort(ReadUShort(FTell()) + addrT_name) == characterIndex)
+            {
+                isExist = 1;
+                break;
+            }
+            else
+            {
+                FSkip(0x2);
+                i++;
+            }
+        }
+
+        if (isExist == 1)
+        {
+            FSeek(ReadUShort(FTell()) + addrT_name);
+            CHARACTER   character(1);
+        }
+        else if (isExist == 0)
+        {
+            FSeek(addrT_name);
+            CHARACTER   character(0) <hidden=true>;
+        }
+    }
+
+    for (characterIndex = characterIndexMax0 + 1; characterIndex <= 1999; characterIndex++)
+    {
+        FSeek(addrT_name);
+        CHARACTER   character(0) <hidden=true>;
+    }
+
+    for (characterIndex = 2000; characterIndex <= characterIndexMax2; characterIndex++)
+    {
+        i = 0, isExist = 0;
+        FSeek(addrT_name + addr2000);
+        while (ReadUShort(ReadUShort(FTell()) + addrT_name) < 2999 && i <= characterCount2)
+        {
+            if (ReadUShort(ReadUShort(FTell()) + addrT_name) == characterIndex)
+            {
+                isExist = 1;
+                break;
+            }
+            else
+            {
+                FSkip(0x2);
+                i++;
+            }
+        }
+
+        if (isExist == 1)
+        {
+            FSeek(ReadUShort(FTell()) + addrT_name);
+            CHARACTER   character(1);
+        }
+        else if (isExist == 0)
+        {
+            FSeek(addrT_name);
+            CHARACTER   character(0) <hidden=true>;
+        }
+    }
+
+} T_name <read=readT_name>;
+*/

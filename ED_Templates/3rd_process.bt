@@ -1,0 +1,221 @@
+//--------------------------------------
+//--- 010 Editor v6.0.3 Binary Template
+//
+// File: 3rd_process.bt
+// Author: acgngca
+// Revision: 2015-10-28
+// Purpose: to parse ed6 3rd process
+//--------------------------------------
+#define ED6_3RD
+#include "ed6_version.bt"
+#include "ed6_common.bt.h"
+#include "ed6_dir.bt"
+
+#include "t_magic.bt"
+#include "3rd_t_name.bt"
+#include "3rd_t_item.bt"
+#include "3rd_t_ittxt.bt"
+#include "3rd_t_btset.bt"
+#include "3rd_t_status.bt"
+#include "3rd_t_orb.bt"
+#include "3rd_t_sltget.bt"
+#include "3rd_t_quartz.bt"
+#include "3rd_t_se.bt"
+#include "3rd_t_dropit.bt"
+
+// global control hide
+typedef UINT32      PTR32_HIDE  <format=hex, fgcolor=cPurple, hidden=true>;
+
+if (g_GameVersion == ed6VersionUnknown)
+{
+    Printf("Exit: ED6 version unknown!\r\n");
+    return -1;
+}
+
+if (~g_GameVersion & ed63min)
+{
+    Printf("Exit: Not ED6 3rd!\r\n");
+    return -1;
+}
+
+local PTR32 addrTextTable           = -1;
+local PTR32 addrDirTable            = -1;
+local PTR32 addrDirEntryCountTable  = -1;
+
+local PTR32 addrCBattle             = -1;
+local PTR32 addrCBattleATBar        = -1;
+local PTR32 addrChrBattleInf        = -1;
+local PTR32 addrTeam                = -1;
+
+if (g_GameVersion == ed63cn7)
+{
+    addrTextTable           = 0x2DED800;
+    addrDirTable            = 0x2CAD950;
+    addrDirEntryCountTable  = 0x2CAF478;
+
+    addrCBattle             = 0x5D13D0;
+    addrCBattleATBar        = 0x7220D0;
+    addrChrBattleInf        = 0x672828;
+    addrTeam                = -1;
+}
+else if (g_GameVersion == ed63jp7)
+{
+    addrTextTable           = 0x2DEADBC;
+    addrDirTable            = 0x2CAAFD0;
+    addrDirEntryCountTable  = 0x2CACAF8;
+
+    addrCBattle             = 0x5CD368;
+    addrCBattleATBar        = 0x71DF98;
+    addrChrBattleInf        = 0x66E780;
+    addrTeam                = -1;
+}
+else if (g_GameVersion == ed63jp1002)
+{
+    addrTextTable           = 0x2DE9324;
+    addrDirTable            = 0x2CA9538;
+    addrDirEntryCountTable  = 0x2CAB060;
+
+    addrCBattle             = 0x5CD228;
+    addrCBattleATBar        = 0x71DE58;
+    addrChrBattleInf        = 0x66E640;
+    addrTeam                = -1;
+}
+
+if (FSeekHeap(addrTextTable) != -1)
+{
+    PTR32_HIDE      addrT_name      ;   // 02DED800
+    PTR32_HIDE      addrT_item      ;   // 02DED804
+    PTR32_HIDE      addrT_ittxt     ;   // 02DED808
+    PTR32_HIDE      addrT_item2     ;   // 02DED80C
+    PTR32_HIDE      addrT_ittxt2    ;   // 02DED810
+    PTR32_HIDE      addrT_magic     ;   // 02DED814
+    PTR32_HIDE      addrT_btset1    ;   // 02DED818
+    PTR32_HIDE      addrT_btset2    ;   // 02DED81C
+    PTR32_HIDE      addrT_town      ;   // 02DED820
+    PTR32_HIDE      addrT_quest     ;   // 02DED824
+    FSkip(8);
+    PTR32_HIDE      addrT_status    ;   // 02DED830
+    PTR32_HIDE      addrT_orb       ;   // 02DED834
+    PTR32_HIDE      addrT_sltget    ;   // 02DED838
+    PTR32_HIDE      addrT_quartz    ;   // 02DED83C
+    FSkip(4);
+    PTR32_HIDE      addrT_cook2     ;   // 02DED844
+    FSkip(4);
+    PTR32_HIDE      addrT_memo      ;   // 02DED84C
+    PTR32_HIDE      addrT_bgmtbl    ;   // 02DED850
+    PTR32_HIDE      addrT_magqrt    ;   // 02DED854
+    PTR32_HIDE      addrT_crfget    ;   // 02DED858
+    PTR32_HIDE      addrT_book00    ;   // 02DED85C
+    PTR32_HIDE      addrT_se        ;   // 02DED860
+    PTR32_HIDE      addrT_world     ;   // 02DED864
+    PTR32_HIDE      addrT_chain     ;   // 02DED868
+    FSkip(4);
+    PTR32_HIDE      addrT_dropit    ;   // 02DED870
+    PTR32_HIDE      addrT_title     ;   // 02DED874
+    PTR32_HIDE      addrT_mmt       ;   // 02DED878
+
+    FSeekHeap(addrT_name);
+    T_name          nameTable;
+
+    FSeekHeap(addrT_magic);
+    T_magic         magicTable;
+
+    FSeekHeap(addrT_item);
+    T_item          itemTable1;
+    FSeekHeap(addrT_item2);
+    T_item          itemTable2;
+
+    FSeekHeap(addrT_ittxt);
+    T_ittxt         ittxtTable1;
+    FSeekHeap(addrT_ittxt2);
+    T_ittxt         ittxtTable2;
+
+    FSeekHeap(addrT_btset1);
+    T_btset         btSetTable1;
+    FSeekHeap(addrT_btset2);
+    T_btset         btSetTable2;
+
+    FSeekHeap(addrT_status);
+    T_status        statusTable;
+
+    FSeekHeap(addrT_orb);
+    T_orb           orbTable;
+
+    FSeekHeap(addrT_sltget);
+    T_sltget        sltgetTable;
+
+    FSeekHeap(addrT_quartz);
+    T_quartz        quartzTable;
+
+    FSeekHeap(addrT_se);
+    T_se            seTable;
+
+    FSeekHeap(addrT_dropit);
+    T_dropit        dropItemTable;
+}
+
+if (FSeekHeap(addrDirEntryCountTable) != -1 && FSeekHeap(addrDirTable) != -1)
+{
+    ED6_DIR_GROUP   dirTable(addrDirEntryCountTable);
+}
+
+if (FSeekHeap(addrCBattle) != -1)
+{
+    FSeekHeap(addrCBattle + 0x98C04);
+    ULONG   BattleNowIndex <format=hex>;
+    // 00672700->
+    // [CBattle+0x98C04]00669FD4-> // the most
+    // [CBattle+0x98C0C]00669FDC->
+    // [CBattleEnv::GetATBonus]0x721A38
+}
+
+local ULONG i;
+if (FSeekHeap(addrChrBattleInf) != -1)
+{
+    for (i = 0; i < 21; ++i)
+    {
+        if (ReadUInt(FTell() + 0x10) == 0 &&
+            ReadUInt(FTell() + 0x14) == 0 &&
+            ReadUInt(FTell() + 0x18) == 0)
+            CHR_BATTLE_INF  ChrBattleInf    <hidden=true>;
+        else
+            CHR_BATTLE_INF  ChrBattleInf;
+    }
+}
+
+if (FSeekHeap(addrCBattleATBar) != -1)
+{
+    CBattleATBar    ATBar;
+}
+
+if (g_GameVersion != ed63cn7)
+{
+    return;
+}
+
+FSeekHeap(0x2D70C2C);
+int             Team[16];
+TEAM_GROUP      TeamFinal[4];
+//FSeekHeap(0x02D70C8C);
+STATUS          Status[32];
+FSeekHeap(0x02D7974A);
+POSITION        position[32];
+FSeekHeap(0x2D798AC);
+ushort  SBreak[32];
+FSeekHeap(0x2D7990E);
+ushort  Replace[32];
+
+FSeekHeap(0x2D783D4);
+uint    sepith[7];
+
+FSeekHeap(0x2D7438C);
+ORBMENT Orbment[32] <optimize=true>;
+ushort  itemInBag;
+
+// 0043A7BC    |.  8B0495 68585B00      |MOV EAX,DWORD PTR DS:[EDX*4+0x5B5868]
+FSeekHeap(0x5B5868);
+PTR32   as_function[0xB2];
+
+FSeekHeap(0x2DA4DD8);
+int IsDisplayAT;
+int IsDisplayConditionAT;

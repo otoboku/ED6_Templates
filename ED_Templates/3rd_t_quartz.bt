@@ -1,0 +1,53 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+
+typedef struct
+{
+    ushort  quartzIndex;
+    ushort  quartzAtt;
+    ushort  quartzSepithCost[7];
+    ushort  quartzElementalValue[7];
+} T_quartz_entry <read=readT_quartz_entry>;
+
+wstring readT_quartz_entry(T_quartz_entry &a)
+{
+    string  str;
+    SPrintf(str, " %d %d %d %d %d %d %d",
+            a.quartzElementalValue[0], a.quartzElementalValue[1], a.quartzElementalValue[2], a.quartzElementalValue[3],
+            a.quartzElementalValue[4], a.quartzElementalValue[5], a.quartzElementalValue[6]);
+    USHORT    att = a.quartzAtt;
+    if (att > 7)
+    {
+        att = 7;
+    }
+    const wchar_t   ATT_NAME[] = L"地水火风时空幻X";
+    return  ATT_NAME[att] + StringToWString(str);
+}
+
+typedef struct
+{
+    local int       i = 0;
+    local ushort    TOTAL = ReadUShort(FTell())/2;
+    ushort          addr[TOTAL] <hidden=true>;
+    for (i = 0; i < TOTAL; ++i)
+    {
+        FSeek(addr[i] + startof(this));
+        T_quartz_entry  quartz;
+    }
+} T_quartz <read=readT_quartz, size=8>;
+
+wstring readT_quartz(T_quartz &a)
+{
+    return  L"回路属性";
+}
+
+if (!IsProcess() && FTell() == 0)
+{
+    T_quartz    quartzTable <open=true>;
+}

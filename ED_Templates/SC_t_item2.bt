@@ -1,0 +1,77 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:
+// Author:
+// Revision: 2015.09.04
+// Purpose:
+//--------------------------------------
+
+typedef struct (int addrFileBase, int index)
+{
+    ushort  addrItemName;     // 物品名 地址
+    ushort  addrItemIntro;    // 物品说明 地址
+    if (addrItemName != 0 && addrItemIntro != 0)
+    {
+        FSeek(addrItemName + addrFileBase);  // 跳转
+        string  ItemName;
+        FSeek(addrItemIntro + addrFileBase); // 跳转
+        string  ItemIntro;
+    }
+    else
+    {
+        local string    ItemName = "nul \t";
+    }
+
+    //local string _str_;
+} T_item2_entry <read=readT_item2_entry, write=writeT_item2_entry>;
+
+string readT_item2_entry(T_item2_entry &a)
+{
+    return  a.ItemName;
+}
+
+void writeT_item2_entry(T_item2_entry &a, string s)
+{
+    // 复制用
+}
+
+typedef struct
+{
+    local uint  addrFileBase = FTell();
+
+    if (ReadUShort(addrFileBase) <= ReadUShort(addrFileBase + 2))
+    {
+        local ushort    TOTAL = ReadUShort(addrFileBase) / 2;
+    }
+    else
+    {
+        local ushort    TOTAL = 0x848 / 2;
+    }
+
+    local int       i;
+    ushort          addr[TOTAL];    // entry 地址
+
+    for (i = 0; i < TOTAL; ++i)
+    {
+
+        FSeek(addr[i] + addrFileBase);   // 跳转
+        T_item2_entry   item2_entry(addrFileBase, i);
+    }
+
+} T_item2 <read=readT_item2, size=sizeT_item2>;
+
+wstring readT_item2(T_item2 &a)
+{
+    return L"物品说明";
+}
+
+int sizeT_item2(T_item2 &a)
+{
+    return ReadUShort(startof(a));
+}
+
+if (!IsProcess() && FTell() == 0)
+{
+    T_item2  ittxtTable <open=true>;
+}

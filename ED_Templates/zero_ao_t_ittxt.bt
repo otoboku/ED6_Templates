@@ -1,0 +1,114 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File: 零之轨迹 t_ittxt._dt t_ittxt2._dt Template
+// Author:acgngca
+// Revision:2011-11-03
+// Purpose:查看、修改魔法战技效果
+// Readme:任何改变文件大小的操作均不可以进行，除非你已经明晰本文件的格式
+//        
+//--------------------------------------
+
+typedef struct(int parITEMTXT)
+{
+    if (parITEMTXT == 1)
+    {
+        ushort  ItemTxtIndex2;
+        ubyte   DUMMY_STRUCT_10[2] <hidden=true>;
+        ushort  addrItemName <hidden=true>;     // 物品名 地址
+        ushort  addrItemIntro <hidden=true>;    // 物品说明 地址
+        if (addrItemName != 0)
+        {
+            FSeek(addrItemName + addrT_ittxt);  // 跳转
+            string  ItemName;
+            FSeek(addrItemIntro + addrT_ittxt); // 跳转
+            string  ItemIntro;
+        }
+        else
+        {
+            local string    ItemName = "nul \t";
+        }
+    }
+    else if (parITEMTXT == 0)
+    {
+        ubyte           DUMMY_STRUCT_01;    // 去掉 WARNING Line xx: Empty structure.
+        local string    ItemName = "nul \t";
+    }
+} ITEMTXT <read=readItemName,write=writeItemName>;
+
+string readItemName(ITEMTXT &a)
+{
+    return  a.ItemName;
+}
+
+void writeItemName(ITEMTXT &a, string s)
+{
+    // 复制用
+}
+
+    local int       itemIndex = 0;
+    local uint      addrT_ittxt = 0;    // 内存编辑用
+    FSeek(addrT_ittxt);
+
+    local ushort    TOTAL = ReadUShort(addrT_ittxt)/2;
+    local int       i = 0, j = 0;
+    ushort          addr[TOTAL];    ////  <hidden=true>;
+
+    // t_ittxt2._dt 衔接
+    if ((ReadUShort(ReadUShort(addr[0] + addrT_ittxt) + addrT_ittxt) != 0)  && 
+        (ReadUShort(ReadUShort(addr[0] + addrT_ittxt) + addrT_ittxt) != itemIndex))
+    {
+        itemIndex = ReadUShort(ReadUShort(addr[0] + addrT_ittxt) + addrT_ittxt);
+        for (j = 0; j < itemIndex; j++)
+        {
+            FSeek(addrT_ittxt);
+            ITEMTXT itemTxt(0) <hidden=true>;
+        }
+    }
+
+    for (i = 0; i < TOTAL - 1; i++)
+    {
+        for (j = 0; j < 100; j++)
+        {
+            if (((addr[i] + j*2) < addr[i+1]) && 
+                (ReadUShort(addr[i] + j*2 + addrT_ittxt) != ReadUShort(addr[i] + j*2 + 2 + addrT_ittxt)))
+                ////if (((addr[i] + j*2) < addr[i+1]) && (ReadUShort(ReadUShort(addr[i] + j*2 + addrT_ittxt) + addrT_ittxt) == k))
+                ////if ((addr[i] + j*2) < addr[i+1])
+            {
+                FSeek(ReadUShort(addr[i] + j*2 + addrT_ittxt) + addrT_ittxt);   // 跳转
+                ITEMTXT itemTxt(1);
+            }
+            else
+            {
+                FSeek(addrT_ittxt);
+                ITEMTXT itemTxt(0) <hidden=true>;
+            }
+            itemIndex++;
+        }
+    }
+
+    for (i; i < TOTAL; i++)
+    {
+        for (j = 0; j < 100; j++)
+        {
+            // 处理最后一个
+            if (((addr[i] + j*2) == (ReadUShort(addr[0] + addrT_ittxt) - 2)) && 1)
+            {
+                FSeek(ReadUShort(addr[i] + j*2 + addrT_ittxt) + addrT_ittxt);   // 跳转
+                ITEMTXT itemTxt(1);
+            }
+            else 
+                if (((addr[i] + j*2) < (ReadUShort(addr[0] + addrT_ittxt) - 2)) && 
+                    (ReadUShort(addr[i] + j*2 + addrT_ittxt) != ReadUShort(addr[i] + j*2 + 2 + addrT_ittxt)))
+                {
+                    FSeek(ReadUShort(addr[i] + j*2 + addrT_ittxt) + addrT_ittxt);   // 跳转
+                    ITEMTXT itemTxt(1);
+                }
+                else
+                {
+                    FSeek(addrT_ittxt);
+                    ITEMTXT itemTxt(0) <hidden=true>;
+                }
+                itemIndex++;
+        }
+    }

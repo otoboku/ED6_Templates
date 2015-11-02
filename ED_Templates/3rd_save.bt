@@ -1,0 +1,106 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+
+typedef struct  //抗性
+{
+    uint    CONDITION_POISON                 : 1;   // 毒
+    uint    CONDITION_FROZEN                 : 1;   // 冻结
+    uint    CONDITION_LANDIFICATION          : 1;   // 石化
+    uint    CONDITION_SLEEPING               : 1;   // 睡眠
+    uint    CONDITION_DISABLE_ARTS           : 1;   // 封魔
+    uint    CONDITION_DARKNESS               : 1;   // 黑暗
+    uint    CONDITION_DISABLE_CRAFT          : 1;   // 封技
+    uint    CONDITION_CHAOS                  : 1;   // 混乱
+    uint    CONDITION_STUN                   : 1;   // 气绝
+    uint    CONDITION_SECOND_KILL            : 1;   // 即死
+    uint    CONDITION_DEF_DOWN_FORCE         : 1;   // 绝对降防
+    uint    CONDITION_RAGE                   : 1;   // 愤怒
+    uint    CONDITION_ARTS_GUARD             : 1;   // ArtGuard
+    uint    CONDITION_CRAFT_GUARD            : 1;   // CraftGuard
+    uint    CONDITION_MOV_UP                 : 1;
+    uint    CONDITION_MOV_DOWN               : 1;
+    uint    CONDITION_STR_UP                 : 1;
+    uint    CONDITION_STR_DOWN               : 1;
+    uint    CONDITION_DEF_UP                 : 1;
+    uint    CONDITION_DEF_DOWN               : 1;
+    uint    CONDITION_SPD_UP                 : 1;
+    uint    CONDITION_SPD_DOWN               : 1;
+    uint    CONDITION_ADF_UP                 : 1;
+    uint    CONDITION_ADF_DOWN               : 1;
+    uint    CONDITION_AGL_UP                 : 1;
+    uint    CONDITION_AGL_DOWN               : 1;
+    uint    CONDITION_MAX_GUARD              : 1;   // 墙
+    uint    CONDITION_VANISH                 : 1;   // Vanish
+    uint    CONDITION_CONDITION_GUARD        : 1;   // 全状态抵抗
+    uint    CONDITION_FAT                    : 1;   // 变胖/变小
+    uint    CONDITION_ATS_UP                 : 1;
+    uint    CONDITION_FORCE_SECOND_KILL      : 1;   // only valid in AS file
+} RESISTANCE;
+
+typedef struct
+{
+    uint                Level;
+    uint                HPMax;
+    uint                HP;
+    ushort              EPMax;
+    ushort              EP;
+    ushort              CP;
+    ubyte               DUMMY_STRUCT_01[2];
+    uint                EXP;    
+    ushort              STR;
+    ushort              DEF;
+    ushort              ATS;
+    ushort              ADF;
+    ushort              DEX;
+    ushort              AGL;
+    ushort              MOV;
+    ushort              SPD;
+    ushort              CPMAX;
+    ubyte               DUMMY_STRUCT_02[4];
+    ushort              RGN;
+    ubyte               DUMMY_STRUCT_03[4];
+    RESISTANCE          condition;  // RESISTANCE类型，进程中有效
+    ushort              CharacterIndex;
+    ubyte               DUMMY_STRUCT_04[2];
+} STATUS;;
+                    
+typedef struct
+{
+    ushort              character1;
+    ushort              character2;
+    ushort              character3;
+    ushort              character4;     
+} TEAM_GROUP;
+
+typedef struct  //站位
+{
+    ubyte       x;  //左下角为00，左右为x，上下为y
+    ubyte       y;
+} POSITION <read=readPosition>;
+
+string readPosition(POSITION &a)
+{
+    string s;
+    SPrintf(s,"%d %d", a.x, a.y);
+    return  s;
+};
+
+
+    FSeek(0x1F42C);
+    uint            TeamNow[16];
+    TEAM_GROUP      TeamFinal[4];
+    STATUS          Status[32];
+    FSeek(0x27F4A);
+    POSITION        position[32];
+    FSeek(0x280AC);
+    ushort          SBreak[32];
+    FSeek(0x2810E);
+    ushort          Replace[32];    //修罗的真姿替换 23 00h
+    FSeek(0x28C5A);
+    //ubyte         SupportCharacter[4];

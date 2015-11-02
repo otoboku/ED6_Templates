@@ -1,0 +1,12 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+FSkip(1);
+#include "ed6_dir.bt"
+FSeek(GetCursorPosEx());
+ED6_DIR dir(-1, -1) <open=true>;

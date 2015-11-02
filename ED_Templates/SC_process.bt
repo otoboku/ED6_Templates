@@ -1,0 +1,386 @@
+//--------------------------------------
+//--- 010 Editor v6.0.3 Binary Template
+//
+// File: sc_process.bt
+// Author: acgngca
+// Revision: 2015-10-28
+// Purpose: to parse ed6 sc process
+//--------------------------------------
+#define ED6_SC
+#include "ed6_version.bt"
+#include "ed6_common.bt.h"
+#include "ed6_dir.bt"
+
+#include "t_magic.bt"
+#include "3rd_t_name.bt"
+#include "3rd_t_status.bt"
+#include "3rd_t_orb.bt"
+#include "3rd_t_sltget.bt"
+#include "3rd_t_quartz.bt"
+#include "3rd_t_se.bt"
+#include "sc_t_item.bt"
+#include "sc_t_item2.bt"
+
+#ifndef ED62_CN1020FC_FC_PART
+#include "3rd_t_btset.bt"
+#else
+#include "fc_t_btset.bt"
+#endif
+
+// global control hide
+typedef UINT32      PTR32_HIDE  <format=hex, fgcolor=cPurple, hidden=true>;
+
+if (g_GameVersion == ed6VersionUnknown)
+{
+    Printf("Exit: ED6 version unknown!\r\n");
+    return -1;
+}
+
+if (~g_GameVersion & ed62min)
+{
+    Printf("Exit: Not ED6 SC!\r\n");
+    return -1;
+}
+
+#ifndef ED6_SC_STEAM
+if ((g_GameVersion & ed62steam) == ed62steam)
+{
+    Printf("Exit: Please use sc_process_steam.bt for steam version!\r\n");
+    return -1;
+}
+#else
+if ((g_GameVersion & ed62steam) != ed62steam)
+{
+    Printf("Exit: Please use sc_process.bt for non steam version!\r\n");
+    return -1;
+}
+#endif
+
+local PTR32 addrTextTable           = -1;
+local PTR32 addrDirTable            = -1;
+local PTR32 addrDirEntryCountTable  = -1;
+local INT32 addrFind                = -1;
+
+if (g_GameVersion == ed62cn7)
+{
+    addrDirTable            = 0x2BF6CC8;
+    addrDirEntryCountTable  = 0x2BF85F0;
+
+    FSeekHeap(0x2F2B308);   PTR32_HIDE   addrT_name     ;
+    FSeekHeap(0x2F2B558);   PTR32_HIDE   addrT_item     ;
+    FSeekHeap(0x2F2B708);   PTR32_HIDE   addrT_item2    ;
+    FSeekHeap(0x2F2B9F8);   PTR32_HIDE   addrT_magic    ;
+    FSeekHeap(0x2F2B424);   PTR32_HIDE   addrT_btset1   ;
+    FSeekHeap(0x2F2B7DC);   PTR32_HIDE   addrT_btset2   ;
+    FSeekHeap(0x2F2B430);   PTR32_HIDE   addrT_face     ;
+    FSeekHeap(0x2F2B8E0);   PTR32_HIDE   addrT_town     ;
+    FSeekHeap(0x2F2B748);   PTR32_HIDE   addrT_quest    ;
+    FSeekHeap(0x2F2B710);   PTR32_HIDE   addrT_quest1   ;
+    FSeekHeap(0x2F2B70C);   PTR32_HIDE   addrT_quest2   ;
+    FSeekHeap(0x2F2B570);   PTR32_HIDE   addrT_exp      ;
+    FSeekHeap(0x2F2B554);   PTR32_HIDE   addrT_status   ;
+    FSeekHeap(0x2F2BA10);   PTR32_HIDE   addrT_orb      ;
+    FSeekHeap(0x2F2B6B8);   PTR32_HIDE   addrT_sltget   ;
+    FSeekHeap(0x2F2B56C);   PTR32_HIDE   addrT_quartz   ;
+    FSeekHeap(0x2F2B75C);   PTR32_HIDE   addrT_cook2    ;
+    FSeekHeap(0x2F2B744);   PTR32_HIDE   addrT_cook     ;
+    FSeekHeap(0x2F2B30C);   PTR32_HIDE   addrT_memo     ;
+    FSeekHeap(0x2F2B758);   PTR32_HIDE   addrT_memo1    ;
+    FSeekHeap(0x2F2B760);   PTR32_HIDE   addrT_bgmtbl   ;
+    FSeekHeap(0x2F2B434);   PTR32_HIDE   addrT_magqrt   ;
+    FSeekHeap(0x2F2B7B0);   PTR32_HIDE   addrT_crfget   ;
+    FSeekHeap(0x2F2B750);   PTR32_HIDE   addrT_book00   ;
+    FSeekHeap(0x2F2B568);   PTR32_HIDE   addrT_se       ;
+    FSeekHeap(0x2F2B7B4);   PTR32_HIDE   addrT_world    ;
+    FSeekHeap(0x2F2B574);   PTR32_HIDE   addrT_chain    ;
+    FSeekHeap(0x2F2B7D8);   PTR32_HIDE   addrT_fish     ;
+}
+else if (g_GameVersion == ed62jp7)
+{
+    addrDirTable            = 0x2BF82B8;
+    addrDirEntryCountTable  = 0x2BF9BE0;
+
+    FSeekHeap(0x2F2C6F0);   PTR32_HIDE   addrT_name     ;
+    FSeekHeap(0x2F2C940);   PTR32_HIDE   addrT_item     ;
+    FSeekHeap(0x2F2CAF0);   PTR32_HIDE   addrT_item2    ;
+    FSeekHeap(0x2F2CDD8);   PTR32_HIDE   addrT_magic    ;
+    FSeekHeap(0x2F2C80C);   PTR32_HIDE   addrT_btset1   ;
+    FSeekHeap(0x2F2CBBC);   PTR32_HIDE   addrT_btset2   ;
+    FSeekHeap(0x2F2C818);   PTR32_HIDE   addrT_face     ;
+    FSeekHeap(0x2F2CCC0);   PTR32_HIDE   addrT_town     ;
+    FSeekHeap(0x2F2CB28);   PTR32_HIDE   addrT_quest    ;
+    FSeekHeap(0x2F2CAF8);   PTR32_HIDE   addrT_quest1   ;
+    FSeekHeap(0x2F2CAF4);   PTR32_HIDE   addrT_quest2   ;
+    FSeekHeap(0x2F2C958);   PTR32_HIDE   addrT_exp      ;
+    FSeekHeap(0x2F2C93C);   PTR32_HIDE   addrT_status   ;
+    FSeekHeap(0x2F2CDF0);   PTR32_HIDE   addrT_orb      ;
+    FSeekHeap(0x2F2CAA0);   PTR32_HIDE   addrT_sltget   ;
+    FSeekHeap(0x2F2C954);   PTR32_HIDE   addrT_quartz   ;
+    FSeekHeap(0x2F2CB3C);   PTR32_HIDE   addrT_cook2    ;
+    FSeekHeap(0x2F2CB24);   PTR32_HIDE   addrT_cook     ;
+    FSeekHeap(0x2F2C6F4);   PTR32_HIDE   addrT_memo     ;
+    FSeekHeap(0x2F2CB38);   PTR32_HIDE   addrT_memo1    ;
+    FSeekHeap(0x2F2CB40);   PTR32_HIDE   addrT_bgmtbl   ;
+    FSeekHeap(0x2F2C81C);   PTR32_HIDE   addrT_magqrt   ;
+    FSeekHeap(0x2F2CB90);   PTR32_HIDE   addrT_crfget   ;
+    FSeekHeap(0x2F2CB30);   PTR32_HIDE   addrT_book00   ;
+    FSeekHeap(0x2F2C950);   PTR32_HIDE   addrT_se       ;
+    FSeekHeap(0x2F2CB94);   PTR32_HIDE   addrT_world    ;
+    FSeekHeap(0x2F2C95C);   PTR32_HIDE   addrT_chain    ;
+    FSeekHeap(0x2F2CBB8);   PTR32_HIDE   addrT_fish     ;
+}
+else if (g_GameVersion == ed62jp1020)
+{
+    addrDirTable            = 0x2BF5820;
+    addrDirEntryCountTable  = 0x2BF7148;
+
+    FSeekHeap(0x2F29C50);   PTR32_HIDE   addrT_name     ;
+    FSeekHeap(0x2F29EA0);   PTR32_HIDE   addrT_item     ;
+    FSeekHeap(0x2F2A050);   PTR32_HIDE   addrT_item2    ;
+    FSeekHeap(0x2F2A338);   PTR32_HIDE   addrT_magic    ;
+    FSeekHeap(0x2F29D6C);   PTR32_HIDE   addrT_btset1   ;
+    FSeekHeap(0x2F2A11C);   PTR32_HIDE   addrT_btset2   ;
+    FSeekHeap(0x2F29D78);   PTR32_HIDE   addrT_face     ;
+    FSeekHeap(0x2F2A220);   PTR32_HIDE   addrT_town     ;
+    FSeekHeap(0x2F2A088);   PTR32_HIDE   addrT_quest    ;
+    FSeekHeap(0x2F2A058);   PTR32_HIDE   addrT_quest1   ;
+    FSeekHeap(0x2F2A054);   PTR32_HIDE   addrT_quest2   ;
+    FSeekHeap(0x2F29EB8);   PTR32_HIDE   addrT_exp      ;
+    FSeekHeap(0x2F29E9C);   PTR32_HIDE   addrT_status   ;
+    FSeekHeap(0x2F2A350);   PTR32_HIDE   addrT_orb      ;
+    FSeekHeap(0x2F2A000);   PTR32_HIDE   addrT_sltget   ;
+    FSeekHeap(0x2F29EB4);   PTR32_HIDE   addrT_quartz   ;
+    FSeekHeap(0x2F2A09C);   PTR32_HIDE   addrT_cook2    ;
+    FSeekHeap(0x2F2A084);   PTR32_HIDE   addrT_cook     ;
+    FSeekHeap(0x2F29C54);   PTR32_HIDE   addrT_memo     ;
+    FSeekHeap(0x2F2A098);   PTR32_HIDE   addrT_memo1    ;
+    FSeekHeap(0x2F2A0A0);   PTR32_HIDE   addrT_bgmtbl   ;
+    FSeekHeap(0x2F29D7C);   PTR32_HIDE   addrT_magqrt   ;
+    FSeekHeap(0x2F2A0F0);   PTR32_HIDE   addrT_crfget   ;
+    FSeekHeap(0x2F2A090);   PTR32_HIDE   addrT_book00   ;
+    FSeekHeap(0x2F29EB0);   PTR32_HIDE   addrT_se       ;
+    FSeekHeap(0x2F2A0F4);   PTR32_HIDE   addrT_world    ;
+    FSeekHeap(0x2F29EBC);   PTR32_HIDE   addrT_chain    ;
+    FSeekHeap(0x2F2A118);   PTR32_HIDE   addrT_fish     ;
+}
+else if (g_GameVersion == ed62steam151029)
+{
+    //addrDirTable            = 0x5B3C00;
+    //addrDirEntryCountTable  = 0x5B3B00;
+
+    FSeekHeap(0x5D8DD8);   PTR32_HIDE   addrT_name     ;
+    FSeekHeap(0x5D8DD0);   PTR32_HIDE   addrT_item     ;
+    FSeekHeap(0x5D8DC4);   PTR32_HIDE   addrT_item2    ;
+    FSeekHeap(0x5D8DC0);   PTR32_HIDE   addrT_magic    ;
+    FSeekHeap(0x5D8DC8);   PTR32_HIDE   addrT_btset1   ;
+    FSeekHeap(0x5D9248);   PTR32_HIDE   addrT_btset2   ;
+    FSeekHeap(0x5D9020);   PTR32_HIDE   addrT_face     ;
+    FSeekHeap(0x5D935C);   PTR32_HIDE   addrT_town     ;
+    FSeekHeap(0x5D8DD4);   PTR32_HIDE   addrT_quest    ;
+    FSeekHeap(0x5D9250);   PTR32_HIDE   addrT_quest1   ;
+    FSeekHeap(0x5D9240);   PTR32_HIDE   addrT_quest2   ;
+    FSeekHeap(0x5D9028);   PTR32_HIDE   addrT_exp      ;
+    FSeekHeap(0x5D9374);   PTR32_HIDE   addrT_status   ;
+    FSeekHeap(0x5D903C);   PTR32_HIDE   addrT_orb      ;
+    FSeekHeap(0x5D9038);   PTR32_HIDE   addrT_sltget   ;
+    FSeekHeap(0x5D8AB4);   PTR32_HIDE   addrT_quartz   ;
+    FSeekHeap(0x5D901C);   PTR32_HIDE   addrT_cook2    ;
+    FSeekHeap(0x5D9030);   PTR32_HIDE   addrT_cook     ;
+    FSeekHeap(0x5D9024);   PTR32_HIDE   addrT_memo     ;
+    FSeekHeap(0x5D9244);   PTR32_HIDE   addrT_memo1    ;
+    FSeekHeap(0x5D8DDC);   PTR32_HIDE   addrT_bgmtbl   ;
+    FSeekHeap(0x5D924C);   PTR32_HIDE   addrT_magqrt   ;
+    FSeekHeap(0x5D9254);   PTR32_HIDE   addrT_crfget   ;
+    FSeekHeap(0x5D8ABC);   PTR32_HIDE   addrT_book00   ;
+    FSeekHeap(0x5D8DF4);   PTR32_HIDE   addrT_se       ;
+    FSeekHeap(0x5D8AA4);   PTR32_HIDE   addrT_world    ;
+    FSeekHeap(0x5D9368);   PTR32_HIDE   addrT_chain    ;
+    FSeekHeap(0x5D9358);   PTR32_HIDE   addrT_fish     ;
+}
+
+local PTR32 addrCBattle             = -1;
+local PTR32 addrCBattleATBar        = -1;
+local PTR32 addrChrBattleInf        = -1;
+local PTR32 addrTeam                = -1;
+local PTR32 addrDifficulty          = -1;
+
+if (g_GameVersion == ed62cn7)
+{
+    addrCBattle             = 0x570590;
+    addrCBattleATBar        = 0x6A11A0;
+    addrChrBattleInf        = 0x60EF38;
+    addrTeam                = 0x2CBD454;
+}
+else if (g_GameVersion == ed62jp7)
+{
+    addrCBattle             = 0x570468;
+    addrCBattleATBar        = -1;
+    addrChrBattleInf        = 0x60EDD8;
+    addrTeam                = -1;
+}
+else if (g_GameVersion == ed62jp1020)
+{
+    addrCBattle             = 0x56F328;
+    addrCBattleATBar        = -1;
+    addrChrBattleInf        = 0x60DC98;
+    addrTeam                = 0x2CBBF94;
+}
+else if (g_GameVersion == ed62steam151029)
+{
+    addrCBattle             = 0x5F0B60;
+    addrDifficulty          = 0x2900CA5;
+}
+
+if ((g_GameVersion & ed62steam) == ed62steam)
+{
+    // find addrDirTable
+    {
+        // common for jp ed6123 all and steam all
+        addrFind = FindFirst("83 C4 10 89 3C B5,h", true, false, FINDMETHOD_NORMAL, 0, 1, ProcessHeapToLocalAddress(0x401000), 0x200000);
+        if (addrFind > 0)
+        {
+            addrDirTable            = ReadUInt(addrFind + 3 + 7 + 3);
+            addrDirEntryCountTable  = ReadUInt(addrFind + 3 + 3);
+        }
+    }
+
+    // find addrCBattleATBar
+    while (1)
+    {
+        // common for steam fc release and steam sc
+        addrFind = FindFirst("69 C9 98 00 00 00 56 8D B1,h", true, false, FINDMETHOD_NORMAL, 0, 1, ProcessHeapToLocalAddress(0x401000), 0x200000);
+        if (addrFind > 0)
+        {
+            addrCBattleATBar = ReadUInt(addrFind + 9) - 4;
+            break;
+        }
+        // common for jp ed6123 all
+        addrFind = FindFirst("6A 00 50 6A 08 56 B9,h", true, false, FINDMETHOD_NORMAL, 0, 1, ProcessHeapToLocalAddress(0x401000), 0x200000);
+        if (addrFind > 0)
+        {
+            addrCBattleATBar = ReadUInt(addrFind + 7);
+            break;
+        }
+        break;
+    }
+
+    // find addrChrBattleInf
+    {
+        addrFind = FindFirst("69 D2 78 24 00 00 8D 92,h", true, false, FINDMETHOD_NORMAL, 0, 1, ProcessHeapToLocalAddress(0x401000), 0x200000);
+        if (addrFind > 0)
+        {
+            addrChrBattleInf = ReadUInt(addrFind + 8);
+        }
+    }
+
+    // find addrTeam
+    {
+        // common for steam fc all and steam sc
+        addrFind = FindFirst("B8 08 00 00 00 2B C1 0F B7 C8 8D 3C BD,h", true, false, FINDMETHOD_NORMAL, 0, 1, ProcessHeapToLocalAddress(0x401000), 0x200000);
+        if (addrFind > 0)
+        {
+            addrTeam = ReadUInt(addrFind + 13);
+        }
+    }
+}
+
+if (exists(addrT_name))
+{
+    addrTextTable           = addrT_name;
+}
+if (FSeekHeap(addrTextTable) != -1)
+{
+    FSeekHeap(addrT_name);
+    T_name          nameTable;
+
+    FSeekHeap(addrT_magic);
+    T_magic         magicTable;
+
+    FSeekHeap(addrT_item);
+    T_item          itemTable;
+
+    FSeekHeap(addrT_item2);
+    T_item2         ittxtTable;
+
+    FSeekHeap(addrT_btset1);
+    T_btset         btSetTable1;
+    FSeekHeap(addrT_btset2);
+    T_btset         btSetTable2;
+
+    FSeekHeap(addrT_status);
+    T_status        statusTable;
+
+    FSeekHeap(addrT_orb);
+    T_orb           orbTable;
+
+    FSeekHeap(addrT_sltget);
+    T_sltget        sltgetTable;
+
+    FSeekHeap(addrT_quartz);
+    T_quartz        quartzTable;
+
+    FSeekHeap(addrT_se);
+    T_se            seTable;
+}
+
+if (FSeekHeap(addrDirEntryCountTable) != -1 && FSeekHeap(addrDirTable) != -1)
+{
+    ED6_DIR_GROUP   dirTable(addrDirEntryCountTable);
+}
+
+if (FSeekHeap(addrDifficulty) != -1)
+{
+    enum <UCHAR> { Normal = 0, Hard, Nightmare, Easy } Difficulty;
+}
+
+if (FSeekHeap(addrCBattle) != -1)
+{
+#ifndef ED6_SC_STEAM
+    FSeekHeap(addrCBattle + 0x97030);
+#else
+    FSeekHeap(addrCBattle + 0x9B08C);
+#endif
+    ULONG   BattleNowIndex <format=hex>;
+}
+
+local ULONG i;
+if (FSeekHeap(addrChrBattleInf) != -1)
+{
+    for (i = 0; i < 21; ++i)
+    {
+        if (ReadUInt(FTell() + 0x0C) == 0 &&
+            ReadUInt(FTell() + 0x10) == 0 &&
+            ReadUInt(FTell() + 0x14) == 0)
+            CHR_BATTLE_INF  ChrBattleInf    <hidden=true>;
+        else
+            CHR_BATTLE_INF  ChrBattleInf;
+    }
+}
+
+if (FSeekHeap(addrCBattleATBar) != -1)
+{
+    CBattleATBar    ATBar;
+}
+
+if (FSeekHeap(addrTeam) != -1)
+{
+    int     Team[8];
+    STATUS  Status[32];
+    EQUIP   Equip[32];
+}
+
+if (g_GameVersion != ed62cn7)
+{
+    return;
+}
+
+FSeekHeap(0x2CC489E);
+ushort  Replace[32];
+
+FSeekHeap(0x2CC0EF4);
+ushort  itemInBag;
+
+FSeekHeap(0x2EE0D5E);
+byte    IsDisplayAT;
+FSeekHeap(0x2EE0D60);
+int     IsDisplayConditionAT;

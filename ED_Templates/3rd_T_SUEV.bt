@@ -1,0 +1,15 @@
+//--------------------------------------
+//--- 010 Editor v4.0.1 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+local int i;
+ushort  total;
+for (i = 0; i < total / 2; i++)
+{
+    FSeek(ReadUShort(2*i));
+    int byFirst <fgcolor=cBlue>;
+}

@@ -1,0 +1,1386 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File: 零之轨迹 内存解析 物品/魔法战技/战斗部分...
+// Author:acgngca
+// Revision:2011-11-11
+// Purpose:方便测试
+// Readme:  可以进行的操作: 修改 物品/魔法战技 包括回路属性值，修改(增加)物品数量，战斗部分各种。
+//          进入战斗后运行模板，战斗部分才会出来。
+//          好多没用的东西被隐藏了； 还有好多东西意义不明，欢迎测试报错 
+//
+//--------------------------------------
+#define ED_ZERO     0x08
+#include "ED6_common.bt.h"
+
+// DT
+Assert(IsProcess(), "It's not a process!"); 
+
+// 一些结构
+//-----------------------------------------------------------------------------------------------------------
+typedef struct
+{
+    FileIndex   MSFileIndex <format=hex>;
+    int         Par <format=hex>;
+} MonsterNote;
+
+typedef struct
+{
+    ushort      CountBattle;
+    ushort      CountDie;
+    ushort      CountBattleWin;
+    FSkip(2);
+    ushort      CountBattleFlee;
+    ushort      CountBattleRestart;
+    ushort      CountSCraftUse;
+    ushort      CountSupportCraftUse;
+    ushort      CountBattlePartyAdvantage;
+    ushort      CountBattleEnemyAdvantage;
+    ushort      CountEnemyKilled;
+    FSkip(2);
+    ushort      InterruptDriveTimes;    // 打断驱动次数
+} BattleRecord;
+
+// 战斗中 各按钮是否可用等参数..DT
+typedef struct
+{
+    local int   index = i;
+    FSkip(0x96);
+    ushort      battleButtonPar;    // 0 空心 字暗 1 实心  2 不可用 4 字亮，正常为 5可用7不可用
+} BattleButton <read=readBattleButton>;
+
+string readBattleButton(BattleButton &a)
+{
+    switch (a.index)
+    {
+    case 0:
+        return "攻击";
+        break;
+    case 1:
+        return "战技";
+        break;
+    case 2:
+        return "道具";
+        break;
+    case 3:
+        return "撤退";
+        break;
+    case 4:
+        return "移动";
+        break;
+    case 5:
+        return "魔法";
+        break;
+    default:
+        return "nul";
+    }
+};
+
+typedef struct
+{   
+    local int i = 0;
+    FSkip(0x28);
+    for (i = 0; i < 6; i++)
+    {
+        BattleButton    battleButton;   // 依次为 攻击、战技、道具、撤退、移动、魔法
+    }
+} BattleButtonGroup;
+
+// 物品定义 部分
+//-----------------------------------------------------------------------------------------------------------
+typedef struct(int parITEM)
+{
+    if (parITEM == 1)
+    {
+        local uint  addrTemp = FTell();
+        local ubyte switchType = ReadUByte(addrTemp + 5);
+        // Type(Pic)
+        // 无效: 00, 99
+        // 装备: 01-10 武器, 11 衣服, 12 鞋子, 13 饰品
+        // 道具: 14 普通道具, 19 回复料理, 22 攻击料理
+        // 事件: 16
+        // 回路: 18
+        // 食材: 20
+        // 书籍: 21
+        // 垂钓: 23 鱼饵, 24 鱼, 25 钓竿
+
+        ushort  ItemIndex;  // 除回路外，物品说明、战斗时的物品名称和说明 靠这个索引, 正常情况下和物品代码相同
+        ubyte   Misc <format=hex>;  
+        // 01 战斗中显示(可以使用,对回复料理无效), 02 可以使用, 04 可以丢弃, 08 可以出售
+        // 10 目标敌方, 20 目标包括战斗不能的 ,40 80 意义不明
+
+        if (switchType == 0 || switchType == 99) 
+        {
+            local string    TypeName = "无效";
+            ubyte   Limit;
+            ubyte   MaxAmount;
+            ubyte   Type;
+            FSkip(18);
+        }
+        else if (switchType >= 1 && switchType <= 12)
+        {
+            local string    TypeName = "装备";
+            ubyte   Limit;  // 仅装备(饰品)有效. 00 无限制, 01-10 CharacterIndex+1, 11 艾莉 诺艾尔 达德利(导力枪,长筒), 12 男, 13 女
+            ubyte   MaxAmount;
+            ubyte   Type;
+            ubyte   Effect; // 附加状态
+            ubyte   Probability;
+            ubyte   DisplayIndex;
+            ubyte   ShapeScope;
+            byte    RNG;
+            byte    ScopeRadius;
+            short   STR;
+            short   DEF;
+            short   ATS;
+            short   ADF;
+            byte    DEXRate;
+            byte    AGLRate;
+            byte    MOV;
+            byte    SPD;
+        }
+        else if (switchType == 13)
+        {
+            local string    TypeName = "饰品";
+            ubyte   Limit;
+            ubyte   MaxAmount;
+            ubyte   Type;
+            ubyte   IsContainResistance;
+            ubyte   Resistance;
+            FSkip(1);
+            ubyte   DisplayIndex;
+            byte    RNG;
+            byte    ScopeRadius;
+            short   STR;
+            short   DEF;
+            short   ATS;
+            short   ADF;
+            byte    DEXRate;
+            byte    AGLRate;
+            byte    MOV;
+            byte    SPD;
+        }
+        else if (switchType == 14 || switchType == 19 || switchType == 22)
+        {
+            local string    TypeName = "道具";
+            local ubyte     Limit = 0;
+            ubyte   Effect3;
+            ubyte   MaxAmount;
+            ubyte   Type;
+            ubyte   Effect1;
+            ubyte   Effect2;
+            FSkip(1);
+            ubyte   ShapeScope;
+            byte    RNG;
+            byte    ScopeRadius;
+            short   Effect1Parameter;
+            ushort  Effect1ST;
+            short   Effect2Parameter;
+            ushort  Effect2ST;
+            byte    Effect3Parameter;
+            ubyte   Effect3ST;
+            FSkip(1);
+            ubyte   DisplayIndex;
+        }
+        else if (switchType == 16)
+        {
+            local string    TypeName = "事件";
+            ubyte   Limit;
+            ubyte   MaxAmount;
+            ubyte   Type;
+            FSkip(18);
+        }
+        else if (switchType == 18)
+        {
+            local string    TypeName = "回路";
+            ubyte   Limit;
+            ubyte   MaxAmount;
+            ubyte   Type;
+            ubyte   Effect;
+            ubyte   QuartzFunction; // 回路效果
+            ubyte   DisplayIndex;
+            ubyte   Level;
+            local uint  addrTemp3 = FTell();
+            // 回路属性值等
+            if (itemIndex >= 100 && itemIndex <=299)
+            {
+                FSeek((itemIndex - 100) * 28 + addrT_quartz);
+                ushort  QuartzIndex <hidden=true>;
+                ushort  QuartzAtt;
+                ushort  QuartzSepithCost[8];
+                ubyte   QuartzElementalValue[8];    
+            }
+            else
+            {
+                Warning("Warning: item[%d]'s Type should not be 18(Quartz).",itemIndex);
+                Printf("Warning: item[%d]'s Type should not be 18(Quartz).\n",itemIndex);
+            }
+            FSeek(addrTemp3);
+            byte    RNG;    // 百分比
+            byte    Probability_deEP;   //省EP、刃回路概率、妨害概率、驱动、范围、机工、治愈
+            short   HP_EP_STR;
+            short   DEF;
+            short   ATS;
+            short   ADF;
+            byte    DEXRate;
+            byte    AGLRate;
+            byte    MOV;
+            byte    SPD;
+        }
+        else if (switchType == 20)
+        {
+            local string    TypeName = "食材";
+            ubyte   Limit;
+            ubyte   MaxAmount;
+            ubyte   Type;
+            FSkip(3);
+            ubyte   DisplayIndex;
+            FSkip(14);
+        }
+        else if (switchType == 21)
+        {
+            local string    TypeName = "书籍";
+            ubyte   Limit;
+            ubyte   MaxAmount;
+            ubyte   Type;
+            FSkip(6);
+            short   BookNo;
+            short   Index;
+            FSkip(8);
+        }
+        else if (switchType == 23 || switchType == 24 || switchType == 25 )
+        {
+            local string    TypeName = "垂钓";
+            ubyte   Limit;
+            ubyte   MaxAmount;
+            ubyte   Type;
+            if (switchType == 24)
+            {
+                ubyte   IsBait; // 仅对Type24鱼类有效. 能否当作鱼饵使用, 1 可以, 0 不可以
+                FSkip(2);
+            }
+            else
+            {
+                FSkip(3);
+            }
+            ubyte   DisplayIndex;
+            FSkip(14);
+        }
+        else
+        {
+            Printf("Warning: item[%d]'s Type is unknown.\n",itemIndex);
+            local string    TypeName = "未知类型";
+            ubyte   Limit;
+            ubyte   MaxAmount;
+            ubyte   Type;
+            ubyte   DUMMY_STRUCT_01[18];
+        }
+
+        uint    Price;  // 出售价格除4
+
+        local uint  addrTemp2 = FTell();
+        ////FSeek(ReadUShort(addrRef[i] + j*2 + addrT_ittxtRef) + addrT_ittxtRef);
+        iTxt = i, jTxt = j;
+        FSeek(ReadUShort(ReadUShort(iTxt*2 + addrT_ittxtRef) + jTxt*2 + addrT_ittxtRef) + addrT_ittxtRef);
+        ushort  ItemTxtIndex;
+        ubyte   DUMMY_STRUCT_10[2] <hidden=true>;       
+        ushort  addrItemName <hidden=true>;     // 物品名 地址
+        ushort  addrItemIntro <hidden=true>;    // 物品说明 地址
+        local uint  addrItemNameReal = addrItemName + addrT_ittxtRef;
+        local uint  addrItemIntroReal = addrItemIntro + addrT_ittxtRef;
+        if (addrItemName != 0)
+        {
+            FSeek(addrItemNameReal);    // 跳转
+            string  ItemName;
+            FSeek(addrItemIntroReal);   // 跳转
+            string  ItemIntro;
+        }
+        else
+        {
+            local string    ItemName = "nul \t";
+            local string    ItemIntro = "nul \t";
+        }
+
+        // 与物品代码不同时，可能的物品名称和说明
+        if (ItemIndex != itemIndex && switchType != 0 && switchType != 99)
+        {
+            Printf("Warning: item[%d]'s ItemIndex does not match.\n",itemIndex);
+
+            iTxt = 0, jTxt = 0;
+            if (ItemIndex < 1000)
+            {
+                iTxt = ItemIndex / 100;
+                jTxt = ItemIndex % 100;
+                addrT_ittxtRef = addrT_ittxt;
+            }
+            else if (ItemIndex >= 1000 && ItemIndex <= itemIndexMax)
+            {
+                iTxt = (ItemIndex - 1000) / 100;
+                jTxt = (ItemIndex - 1000) % 100;
+                addrT_ittxtRef = addrT_ittxt2;
+            }
+            else
+            {
+                local string    ItemNameAlias = "nul \t";
+                break;
+            }
+            FSeek(ReadUShort(ReadUShort(iTxt*2 + addrT_ittxtRef) + jTxt*2 + addrT_ittxtRef) + addrT_ittxtRef);
+            ushort  ItemTxtIndexAlias;
+            ubyte   DUMMY_STRUCT_20[2] <hidden=true>;       
+            ushort  addrItemNameAlias <hidden=true>;        // 物品名 地址
+            ushort  addrItemIntroAlias <hidden=true>;       // 物品说明 地址
+            local uint  addrItemNameAliasReal = addrItemNameAlias + addrT_ittxtRef;
+            local uint  addrItemIntroAliasReal = addrItemIntroAlias + addrT_ittxtRef;
+            if (addrItemNameAlias != 0)
+            {
+                FSeek(addrItemNameAliasReal);   // 跳转
+                string  ItemNameAlias;
+                FSeek(addrItemIntroAliasReal);  // 跳转
+                string  ItemIntroAlias;
+            }
+            else
+            {
+                local string    ItemNameAlias = "nul \t";
+            }
+        }
+        else
+        {
+            local string    ItemNameAlias = "nul \t";
+        }
+
+        FSeek(addrTemp2);
+    }
+    else if (parITEM == 0)
+    {
+        ubyte           DUMMY_STRUCT_01;    // 去掉 WARNING Line xx: Empty structure.
+        local ubyte     switchType = 255;
+        local ushort    ItemIndex = itemIndex;
+        local string    TypeName = "nul \t";
+        local string    ItemName = "nul \t";
+        local string    ItemNameAlias = "nul \t";
+    }
+} ITEM <read=readItemName,write=writeItemName>;
+
+string readItemName(ITEM &a)
+{
+    string s;
+    SPrintf(s,"%02d",a.Type);
+    if (a.ItemNameAlias == "nul \t")
+        return  s + a.TypeName + " " + a.ItemName;
+    else
+        return  s + a.TypeName + " " + a.ItemName + " or "+ a.ItemNameAlias;
+}
+
+void writeItemName(ITEM &a, string s)
+{
+    // 复制用
+}
+
+typedef struct
+{
+    local int       itemIndex = 0;
+    local int       itemIndexMax = 1700;
+    local int       i = 0, j = 0;
+    local int       iTxt = 0, jTxt = 0;
+
+    local uint      addrT_itemRef = addrT_item;
+    local uint      addrT_ittxtRef = addrT_ittxt;
+    FSeek(addrT_itemRef);
+
+    local ushort    TOTAL = ReadUShort(addrT_itemRef)/2;
+    ushort          addr[TOTAL] <hidden=true>;
+
+    local ushort    addrRef[TOTAL];
+    for (i=0; i<TOTAL; i++)
+    {
+        addrRef[i] = addr[i];
+    }
+
+    // t_item2._dt 衔接
+    if ((ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef) != 0)  && 
+        (ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef) != itemIndex))
+    {
+        itemIndex = ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef);
+        for (j = 0; j < itemIndex; j++)
+        {
+            FSeek(addrT_itemRef);
+            ITEM    item(0) <hidden=true>;
+        }
+    }
+
+    for (i = 0; i < TOTAL - 1; i++)
+    {
+        for (j = 0; j < 100; j++)
+        {
+            if (((addrRef[i] + j*2) < addrRef[i+1]) && 
+                (ReadUShort(addrRef[i] + j*2 + addrT_itemRef) != ReadUShort(addrRef[i] + j*2 + 2 + addrT_itemRef)))
+                ////if (((addrRef[i] + j*2) < addrRef[i+1]) && (ReadUShort(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef) == k))
+                ////if ((addrRef[i] + j*2) < addrRef[i+1])
+            {
+                FSeek(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef);    // 跳转
+                ITEM    item(1);
+            }
+            else
+            {
+                FSeek(addrT_itemRef);
+                ITEM    item(0) <hidden=true>;
+            }
+            itemIndex++;
+        }
+    }
+
+    for (i; i < TOTAL; i++)
+    {
+        for (j = 0; j < 100; j++)
+        {
+            // 处理最后一个
+            if (((addrRef[i] + j*2) == (ReadUShort(addrRef[0] + addrT_itemRef) - 2)) && 1)
+            {
+                FSeek(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef);    // 跳转
+                ITEM    item(1);
+            }
+            else 
+                if (((addrRef[i] + j*2) < (ReadUShort(addrRef[0] + addrT_itemRef) - 2)) && 
+                    (ReadUShort(addrRef[i] + j*2 + addrT_itemRef) != ReadUShort(addrRef[i] + j*2 + 2 + addrT_itemRef)))
+                {
+                    FSeek(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef);    // 跳转
+                    ITEM    item(1);
+                }
+                else
+                {
+                    FSeek(addrT_itemRef);
+                    ITEM    item(0) <hidden=true>;
+                }
+                itemIndex++;
+        }
+    }
+
+    //item2
+    ///////////////////////////////////////////////////////////////
+    addrT_itemRef = addrT_item2;
+    addrT_ittxtRef = addrT_ittxt2;
+    FSeek(addrT_itemRef);
+
+    TOTAL = ReadUShort(addrT_itemRef)/2;
+    ushort          addr2[TOTAL] <hidden=true>;
+
+    for (i=0; i<TOTAL; i++)
+    {
+        addrRef[i] = addr2[i];
+    }
+
+    // t_item2._dt 衔接
+    if ((ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef) != 0)  && 
+        (ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef) != itemIndex))
+    {
+        itemIndex = ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef);
+        for (j = 0; j < itemIndex; j++)
+        {
+            FSeek(addrT_itemRef);
+            ITEM    item(0) <hidden=true>;
+        }
+    }
+
+    for (i = 0; i < TOTAL - 1; i++)
+    {
+        for (j = 0; j < 100; j++)
+        {
+            if (((addrRef[i] + j*2) < addrRef[i+1]) && 
+                (ReadUShort(addrRef[i] + j*2 + addrT_itemRef) != ReadUShort(addrRef[i] + j*2 + 2 + addrT_itemRef)))
+                ////if (((addrRef[i] + j*2) < addrRef[i+1]) && (ReadUShort(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef) == k))
+                ////if ((addrRef[i] + j*2) < addrRef[i+1])
+            {
+                FSeek(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef);    // 跳转
+                ITEM    item(1);
+            }
+            else
+            {
+                FSeek(addrT_itemRef);
+                ITEM    item(0) <hidden=true>;
+            }
+            itemIndex++;
+        }
+    }
+
+    for (i; i < TOTAL; i++)
+    {
+        for (j = 0; j < 100; j++)
+        {
+            // 处理最后一个
+            if (((addrRef[i] + j*2) == (ReadUShort(addrRef[0] + addrT_itemRef) - 2)) && 1)
+            {
+                FSeek(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef);    // 跳转
+                ITEM    item(1);
+            }
+            else 
+                if (((addrRef[i] + j*2) < (ReadUShort(addrRef[0] + addrT_itemRef) - 2)) && 
+                    (ReadUShort(addrRef[i] + j*2 + addrT_itemRef) != ReadUShort(addrRef[i] + j*2 + 2 + addrT_itemRef)))
+                {
+                    FSeek(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef);    // 跳转
+                    ITEM    item(1);
+                }
+                else
+                {
+                    FSeek(addrT_itemRef);
+                    ITEM    item(0) <hidden=true>;
+                }
+                itemIndex++;
+        }
+    }
+
+} T_item <read=readT_item>;
+
+string readT_item(T_item &a)
+{
+    return  "物品定义";
+}
+
+// 拥有的物品及数量 部分
+//-----------------------------------------------------------------------------------------------------------
+typedef struct(int parItemInBag)
+{
+    ushort  itemIndex;
+    ubyte   amount;
+    FSkip(1);
+    local ubyte IsDisplayAmount = 1;
+    if (parItemInBag == 1)
+    {
+        local string TypeName = itemTable.item[itemIndex].TypeName;
+        local uint  addrTemp = FTell();
+        FSeek(itemTable.item[itemIndex].addrTemp+4);
+        ubyte   MaxAmount;
+        FSeek(itemTable.item[itemIndex].addrItemNameReal);  // 跳转
+        string  ItemName;
+        FSeek(itemTable.item[itemIndex].addrItemIntroReal); // 跳转
+        string  ItemIntro;
+        FSeek(addrTemp);
+    }
+    else if  (parItemInBag == 0)
+    {
+        local string TypeName = "无效";
+        local string ItemName = "未知";
+    }
+    else if  (parItemInBag == 2)
+    {
+        IsDisplayAmount = 0;
+        local string TypeName = "在此增加物品1";
+        local string ItemName = "";
+    }
+    else if  (parItemInBag == 3)
+    {
+        IsDisplayAmount = 0;
+        local string TypeName = "在此增加物品2, 必须按顺序来！";
+        local string ItemName = "";
+    }
+    else if  (parItemInBag == 4)
+    {
+        IsDisplayAmount = 0;
+        local string TypeName = "在此增加物品3, 想添加更多请刷新并再次运行模板";
+        local string ItemName = "";
+    }
+    else if  (parItemInBag == 0x10)
+    {
+        IsDisplayAmount = 0;
+        local string TypeName = "";
+        local string ItemName = "";
+    }
+} ItemInBag <read=readItemInBagName,write=writeItemInBagName>;
+
+string readItemInBagName(ItemInBag &a)
+{
+    if (a.IsDisplayAmount == 1)
+    {
+        string s;
+        SPrintf(s,"%02d",a.amount);
+        return  a.TypeName + " " + a.ItemName + "  " + s;
+    }
+    else if (a.IsDisplayAmount == 0)
+        return  a.TypeName;
+}
+
+void writeItemInBagName(ItemInBag &a, string s)
+{
+    // 复制用
+}
+
+typedef struct
+{
+    local int itemInBagIndex = 0;
+    while(ReadUShort(FTell()) > 0)
+    {
+        if (ReadUShort(FTell()) > itemTable.itemIndexMax)
+        {
+            Printf("Warning: itemInBag[%d]'s itemIndex is out of range.\n",itemInBagIndex);
+            ItemInBag   itemInBag(0);
+        }
+        else if (itemTable.item[ReadUShort(FTell())].ItemName == "nul \t")
+        {
+            Printf("Warning: itemInBag[%d] may not exist.\n",itemInBagIndex);
+            ItemInBag   itemInBag(0);
+        }
+        else
+        {
+            ItemInBag   itemInBag(1);
+            if (itemInBag[itemInBagIndex].amount > itemInBag[itemInBagIndex].MaxAmount)
+            {
+                Printf("Warning: itemInBag[%d]'s amount is out of range.\n",itemInBagIndex);
+            }
+        }
+        itemInBagIndex++;
+    }
+    ItemInBag   itemInBag(2);
+    ItemInBag   itemInBag(3);
+    ItemInBag   itemInBag(4);
+} ItemInBagGroup <read=readItemInBagGroup>;
+
+string readItemInBagGroup(ItemInBagGroup &a)
+{
+    return  "拥有的物品及数量";
+}
+
+// 魔法战技定义 部分
+//-----------------------------------------------------------------------------------------------------------
+typedef struct(int parMAGIC)
+{
+    if (parMAGIC == 1)
+    {
+        ushort  AnimationType;
+        ubyte   Target; 
+        ubyte   SpecialEffect;      // 01 强制命中 02 驱动时无法被打断
+        ubyte   Att;                // 属性
+        // 空轨FCSC     0无 1地 2水 3火 4风 5空 6幻 0时 // FCSC没有 时空幻有效率，所以无所谓
+        // 空轨3rd      0无 1地 2水 3火 4风 5空 6幻 7时
+        // 零轨碧轨     0无 1地 2水 3火 4风 5时 6空 7幻
+        ubyte   ShapeScope;         // 范围形状
+        ubyte   Effect1;
+        ubyte   Effect2;
+        if (CRAFT_INFO_SIZE == 32)
+        {
+            ushort  RNG;
+            ushort  ScopeRadius;        // 半径
+            ushort  STCharge;
+            ushort  STCoolDown;
+            ushort  CP_EP;
+            ushort  DisplayIndex;       // 魔法列表中的显示先后，t_magic._dt中的才有效，ms文件中的一般为1或0。
+        }
+        else if (CRAFT_INFO_SIZE == 28)
+        {
+            ubyte   DisplayIndex;       // 魔法列表中的显示先后，t_magic._dt中的才有效，ms文件中的一般为1或0。
+            ubyte   RNG;
+            ubyte   STCharge;
+            ubyte   STCoolDown;
+            ushort  CP_EP;
+            ushort  ScopeRadius;        // 半径
+        }
+        short   Effect1Parameter;
+        ushort  Effect1ST;
+        short   Effect2Parameter;
+        ushort  Effect2ST;
+
+        local uint  addrTemp = FTell();
+
+        ushort  addrMagicName <hidden=true>;    // 魔法名 地址
+        ushort  addrMagicIntro <hidden=true>;   // 魔法说明 地址
+        local uint addrMagicNameReal = addrMagicName + addrT_magic;
+        local uint addrMagicIntroReal = addrMagicIntro + addrT_magic;
+        if (addrMagicName != 0)
+        {
+            FSeek(addrMagicNameReal);       // 跳转
+            string  MagicName;
+            FSeek(addrMagicIntroReal);      // 跳转
+            string  MagicIntro;
+        }
+        else
+        {
+            local string    MagicName = "nul \t";
+        }
+
+        // 魔法属性值
+        if (i >=10 && i <= 134) // 不准确，逆行。 魔法列表的生成是直接去查t_magqrt, 只要MagicIndex对的上且属性值够就会添加, 不管是不是Art有没有定义. 搜索范围为(不对)max(134?, ReadUShort(0)/2).
+        ////if ((i >0)  && (i < ReadUShort(addrT_magqrt)/2) && (ReadUShort(ReadUShort(i*2 + addrT_magqrt) + addrT_magqrt) == i))
+        {
+            FSeek(ReadUShort(i*2 + addrT_magqrt) + addrT_magqrt);
+            ushort  MagicIndex <hidden=true>;
+            ushort  MagicElementalValue[7];
+        }
+
+        FSeek(addrTemp);
+    }
+    else if (parMAGIC == 0)
+    {
+        ubyte           DUMMY_STRUCT_01;    // 去掉 WARNING Line xx: Empty structure.
+        local string    MagicName = "nul \t";
+    }
+} MAGIC <read=readMagicName,write=writeMagicName>;
+
+string readMagicName(MAGIC &a)
+{
+    return  a.MagicName;
+}
+
+void writeMagicName(MAGIC &a, string s)
+{
+    // 复制用
+}
+
+typedef struct
+{
+    // 魔法个数
+    if (ReadUShort(addrT_magic) == 0x72F0)
+    {
+        local ushort    TOTAL = 373;    // 整合补丁特例
+    }
+    else if (ReadUShort(addrT_magic) < ReadUShort(addrT_magic + 2))
+    {
+        local ushort    TOTAL = ReadUShort(addrT_magic)/2;  // 零轨350 碧轨433
+    }
+
+    // 魔法条长度 碧轨24+4 空轨零轨28+4
+    if (ReadUShort(addrT_magic) == 0x362)
+    {
+        local ushort    CRAFT_INFO_SIZE = 28;
+    }
+    else
+    {
+        local ushort    CRAFT_INFO_SIZE = 32;
+    }
+
+    local int       i;
+    ushort          addr[TOTAL]  <hidden=true>; // 魔法条 地址
+
+    for (i = 0; i < TOTAL-1; i++)
+    {
+        if (addr[i+1] - addr[i] >= CRAFT_INFO_SIZE)
+        {
+            FSeek(addr[i] + addrT_magic);   // 跳转
+            MAGIC   magic(1);
+        }
+        else
+        {
+            FSeek(addrT_magic);
+            MAGIC   magic(0) <hidden=true>; // 隐藏无效魔法
+        }
+    }
+
+    // 解决最后一个
+    if (((magic[0].addrMagicName > addr[TOTAL-1]) && (magic[0].addrMagicName - addr[TOTAL-1] >= CRAFT_INFO_SIZE)) ||
+        ((magic[0].addrMagicName < addr[TOTAL-1]) && (FileSize() - addr[TOTAL-1] >= CRAFT_INFO_SIZE)))
+    {
+        FSeek(addr[TOTAL-1] + addrT_magic);
+        MAGIC   magic(1);
+    }
+    else//// if (addr[i] == addr[i-1])
+    {
+        FSeek(addrT_magic);
+        MAGIC   magic(0);
+    }
+} T_magic <read=readT_magic>;
+
+string readT_magic(T_magic &a)
+{
+    return  "魔法战技定义";
+}
+
+#include "zero_ao_t_name.bt"
+FSeek(addrT_name);
+T_name          characterTable;
+
+// 地点列表
+//-----------------------------------------------------------------------------------------------------------
+typedef struct
+{
+    local uint  addrPlaceNameReal = FTell();
+    string  PlaceName;
+} PLACE <read=readPlaceName,write=writePlaceName>;
+
+string readPlaceName(PLACE &a)
+{
+    return  a.PlaceName;
+}
+
+void writePlaceName(PLACE &a, string s)
+{
+    // 复制用
+};
+
+typedef struct
+{
+    local int       PlaceIndex = 0;
+    ushort          TOTAL <hidden=true>;
+    ushort          addr[TOTAL] <hidden=true>;
+    for (PlaceIndex = 0; PlaceIndex < TOTAL; PlaceIndex++)
+    {
+        FSeek(addr[PlaceIndex] + addrT_town);
+        PLACE   place;
+    }
+} T_town <read=readT_town>;
+
+string readT_town(T_town &a)
+{
+    return  "地点列表";
+}
+
+// 成就列表
+//-----------------------------------------------------------------------------------------------------------
+typedef struct
+{
+    ubyte       DisplayFlag;    // 显示参数, 01 未达成前不显示名称, 02 未达成前不显示介绍
+    ubyte       pt;
+    ushort      Count;  // 达成条件，数量
+    ushort      DisplayIndex;
+    FSkip(2);
+    ushort      addrRecordName <hidden=true>;
+    ushort      addrRecordIntro <hidden=true>;
+    local uint  addrRecordNameReal = addrRecordName + addrT_record;
+    local uint  addrRecordIntroReal = addrRecordIntro + addrT_record;
+    local uint  addrTemp = FTell();
+    FSeek(addrRecordNameReal);      // 跳转
+    string  RecordName;
+    FSeek(addrRecordIntroReal);     // 跳转
+    string  RecordIntro;
+    FSeek(addrTemp);
+} RECORD <read=readRecordName,write=writeRecordName>;
+
+string readRecordName(RECORD &a)
+{
+    string s;
+    SPrintf(s,"%04d ",a.Count);
+    return  s + a.RecordName + " " + a.RecordIntro;
+}
+
+void writeRecordName(RECORD &a, string s)
+{
+    // 复制用
+};
+
+typedef struct
+{
+    RECORD  Record[48] <optimize=false>;
+} T_record <read=readT_record>;
+
+string readT_record(T_record &a)
+{
+    return  "成就列表";
+}
+
+// 战斗 部分
+//-----------------------------------------------------------------------------------------------------------
+
+typedef struct
+{
+    local int           addrStart = FTell();
+    local int           soldierIndex = j;
+    // 0
+    ushort              SoldierNo;                  // 我方0-7，敌方8-15，支援16-19，待分身20-21
+    ubyte               unknownFlags1 <format=hex, hidden=true>;
+    ubyte               Flags <format=hex>;                      // 10 敌方 40 己方 ...
+    ubyte               DeathFlags <format=hex>;                 // 02 不参与战场胜利判定 04 死后留在战场上
+    ubyte               UnderAttackFlags <format=hex>;           // 08 Resist ATDelay 02 不被击退 01 无法移动(移动会卡死)  10 无法被攻击到  20 强制miss
+    FSkip(4);   // 复制上面四个参数？？？
+    ushort              CharacterIndex;
+    FSkip(2);   // FF 00 常量？
+    ushort              ATActTime;  // AT条动多少次，初始为0; AiTime1F
+    FileIndex           SYFileIndex <format=hex>;
+    FileIndex           MSFileIndex <format=hex>;
+    FileIndex           ASFileIndex <format=hex>;    
+
+    ubyte               DUMMY_STRUCT_00[312] <hidden=true>;
+    ubyte               DUMMY_STRUCT_001[40] <hidden=true>;
+    ubyte               dieAfterSoldierNoDie <hidden=true>;   // 分身用，正常FF
+    ubyte               DUMMY_STRUCT_002[85] <hidden=true>;
+    ubyte               attackStatus[8] <hidden=true,hidden=true>;    
+    // 最近八次的攻击与被攻击情况 队列。从AT=0开始累计，下次AT=0时结果后移，位置0清空。
+    // 01 受到攻击掉血大于0; 02 发动攻击命中掉血; 04 上次未使用,对应AiTime09; 
+    // 08 受到攻击掉血大于1/10; 10 受到物理攻击命中掉血
+    ubyte               DUMMY_STRUCT_003[51] <hidden=true>;    
+    ubyte               IsLastFightMissToSoldierNo[16];// <hidden=true>;
+    ubyte               IsLastFightTargetToSoldierNo[16];// <hidden=true>;
+    ubyte               DUMMY_STRUCT_01[11] <hidden=true>;    
+    // 568
+    local uint          addrHP = FTell();
+    STATUS              StatusBasic;    // normal难度基础值
+    // 568 + 52
+    STATUS              StatusSum;      // 算上难度、装备、回路
+    ushort              MoveSPD <hidden=true>;                // 移动速度，我方人员也从ms文件中读取
+    ushort              MoveAfterAttack <hidden=true>;        // 从ms文件中读取
+    CONDITION           Condition[32];
+    ubyte               DUMMY_STRUCT_02[24] <hidden=true>;
+    uint                AT;
+    uint                AT2;    // AiTime08用
+    // 0x544
+    ushort              AIType;
+    ushort              EXPGet;                     // 战斗胜利 结算经验前暂存
+    ushort              DropIndex1 <hidden=true>;                 // 掉落物 物品代码
+    ushort              DropIndex2 <hidden=true>;
+    ubyte               DropProbability1 <hidden=true>;           // 掉落概率
+    ubyte               DropProbability2 <hidden=true>;    
+    ubyte               Sex <hidden=true>; 
+    ubyte               DisplayHighLevelArtsAttResistance <hidden=true>;      
+    // 是否开启时空幻有效率显示，0/8 不开启 1/9 开启，应该是标志位，可能含有更多信息
+    ushort              Equip[5];                   // 装备
+    ushort              Orb[7];                     // 回路   7个 
+
+    ED7_AI_INFO         NormalAttack;
+    ED7_AI_INFO         Arts[80];
+    ED7_AI_INFO         Craft[10];
+    ED7_AI_INFO         SCraft[5];
+    ED7_AI_INFO         SupportCraft[3]; 
+    CraftLastUsed_INFO  CraftLastUsed;
+    FleeParameter       fleeParameter <hidden=true>;
+    // 3768 + addrStart
+    // 16条战技定义共512字节，（说明256 名字32）共288x
+    local uint          addrCraftDefinition = FTell();
+    local ushort        CRAFT_INFO_SIZE = 32;   // 魔法条长度 碧轨24+4 空轨零轨28+4
+    ED7_CRAFT_DEFINITION_GROUP  CraftDefinition;    // 实际上只能放15个
+    // 4280
+    ////ubyte               DUMMY_STRUCT_06[32] <hidden=true>;
+    ubyte               DUMMY_STRUCT_07[288*16] <hidden=true>;    // 战技说明
+    ubyte               DUMMY_STRUCT_08[64] <hidden=true>;
+    // FSkip(288*15 + 352);
+    // 8952
+    ubyte               Sepith[7] <hidden=true>;                  // 掉落耀晶片
+    ubyte               DUMMY_STRUCT_09 <hidden=true>;
+    ushort              ArtsAttResistance[8] <hidden=true>;       // 七曜属性有效率
+    RESISTANCE          Resistance;
+    ubyte               DUMMY_STRUCT_11[132] <hidden=true>;
+
+    FSeek(addrBattleStart + 0x660 + 0x320*soldierIndex + 0xE0);
+    string              CharacterName;
+    // 9112
+    FSeek(addrStart + 0x2398);
+    string              CharacterIntro;
+    FSeek(addrStart + 0x2418);
+    ubyte               DUMMY_STRUCT_12[8] <hidden=true>;
+    FSeek(addrStart + CHR_BATTLE_INF_SIZE);
+    // 9112 + 164 = 9276 243C
+
+} ED7_CHARACTER_BATTLE_INF <read = readMSFileIndex>;
+
+string readMSFileIndex(ED7_CHARACTER_BATTLE_INF &a)
+{
+    string  temp;
+    SPrintf(temp,"ms%x",a.MSFileIndex);
+    temp = StrDel(temp,2,3);
+    return  temp + " " + a.CharacterName;
+}
+
+// 杂项，合在一块
+//-----------------------------------------------------------------------------------------------------------
+typedef struct
+{
+    // 地点列表
+    FSeek(addrT_town);
+    T_town          placeTable;
+
+    // 成就列表
+    FSeek(addrT_record);
+    T_record        recordTable;
+
+    // 拥有的物品及数量
+    FSeek(addrBase + 0x79EE8);
+    ItemInBagGroup  itemInBag;
+    
+    // 正在播放的BGM编号
+    FSeek(addrBase + 0x24E);
+    ushort          BGMNowIndex;
+
+    FSeek(addrTime);
+    uint            TimeElapse; // 游戏运行时间ms
+
+    FSeek(addrBase + 0x78FD8);
+    ushort  FurnitureSet;
+    // 家具设置已提示 00 40; 导力车模型 40 00, 导力音响 80 00; 
+    // 挂钟 00 01, 典雅花瓶 00 02;壁挂咪西 00 04, 坐姿咪西 00 08; 伊莉娅的海报 00 10, 飞镖套装 00 20;
+    // 和家具无关的. 地下空间A通往中央广场的楼梯处剧情已进行 08 00; 警察本部出示战斗手册已提示 04 00; 游击士协会2L 2个MM和Tio的剧情已进行 01 00
+    ubyte           CatFeed;    // 可以喂猫已提示 01; 1章-2章-3章-间章-4章-终章 02-04-08-10-20-40; 7F减去对应章节的数字，任何章节都能拿双子珠..DT
+    FSkip(7);
+    ubyte           Ai20H;
+    // 一周目初始01，二周目初始11；第二章开始04位置置1；使用一次“虚空幻域”后80位置置1（和那个任务没关系）；
+    // 第三章去米修拉姆后04位置置0；议长宅邸中对猎犬剧情战 如果 琪雅使用一次“声波攻击”(30%)，20位置置1；门口剧情战后08位置置1；boss战后08位置置0，04位置置1；
+    // 04位置 关系到蔡特是否可用；08位置关系到琪雅是否作为支援人员；20位置关系到琪雅Ai；
+    // 01 05 85 81 A1 A9 A5
+
+    FSeek(addrBase + 0x79020);
+    uint            JizoWorship;        // 地藏供奉, 8个提示+24个料理. 全开直接拿日轮珠 7F FF FF FF
+    FSeek(addrBase + 0x78F8A);
+    ubyte           JizoWorshipRefresh; // 锁定为0可以连续供奉，不用来回跑...DT
+
+    FSeek(addrBase + 0x79078);
+    ushort          OrbmentCoverChange; // 导力器外壳更换, 2000 Lloyd, 4000 Elie, 8000 Tio, 0001 Randy
+
+    // Mira
+    FSeek(addrBase + 0x7D3B4);
+    int         Mira;
+    FSkip(4);
+    int         Medal;
+    FSkip(8);
+    int         DP; // Detective Point
+    int         Sepith[7];
+
+    FSeek(addrBase + 0x7EE18);
+    int         DL; // Detective Level, 取值0-14, 对应等级为15-DL
+
+    FSeek(addrBase + 0x7EF60 + 0x30);
+    ushort          CCraftUsedTimes[12];        // 与特定人组合战技使用次数
+    ubyte           Feelings[12];   // 好感度，位置[1][2][3]有效，对应人物代码
+
+    FSeek(addrBase + 0x7F184);
+    BattleRecord        battleRecord;
+
+    FSeek(addrBase + 0x7FD48);
+    ArrayBytes      Record(6);      // 48个标志位，全成就6个F
+    FSeek(addrBase + 0x7FD50);
+    uint            Extra;          // 全开 0x0003FFDF
+
+    FSeek(addrBase + 0xA51FC);
+    ubyte           ExtraFlag;      // 是否显示EXTRA，开始界面进OPTION切换有效，一般为03，02位置意义不明
+    
+    FSeek(addrBase + 0x7E054);
+    uint            RecipeNote[3];  // 料理手册。 菜谱取得、大成功料理取得、预想外料理取得，全开FE FF FF 01(0x01FFFFFE)
+
+    FSeek(addrBase + 0xA110C);
+    MonsterNote     monsterNote[238];   // 怪物手册，暴力全开：t_mons._dt复制到这，参数改为全F(0x7FFFFF04足矣)
+    FSeek(addrT_mons);
+    MonsterNote     monsterNoteInit[238];   // 怪物手册初始？ t_mons._dt
+
+    FSeek(addrBase + 0xA5109);
+    enum <ubyte> DIFFICULTY { Normal = 0, Hard, Nightmare, Easy } Difficulty;
+    ////ubyte           Difficulty;     // 00 Normal 01 Hard 02 Nightmare 03 Easy
+
+    // 当前所在场景、地点
+    FSeek(addrBase + 0x7DD70);
+    int             ScenaCode <format=hex>;         // 场景代码
+    int             ScenaNode;                      // 场景中的出入口代码，貌似都是从0x64开始的
+    int             ChapterIndex;                   // 章节代码，序章-3章-间章-4章-终章 0-3-4-5-6
+    int             ScenaNameIndex;                 // 场景名称代码
+    FSeek(placeTable.place[ScenaNameIndex].addrPlaceNameReal);
+    string          ScenaName;
+    FSeek(addrBase + 0x7DD7C + 4);
+
+    ////FSeek(addrBase + 0x78EF0);  // 战斗时视点远近 _L 0x20457B94 0xyyyyyyyy
+    ////uint    CDFixation;
+
+} MISCS;
+
+typedef struct
+{
+    // 角色信息 战斗外
+    ////FSeek(addrBase + 0x791B8);
+    //FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x38498) + 0x2CC));
+    //ushort            Team[8];
+    FSeek(addrBase + 0x791C8);
+    STATUS          Status[12];
+    // 0x79438
+    EQUIP           Equip[12];
+    // 
+    ARTS            Arts[12];
+    // 
+    CRAFT           Craft[12];
+    // 
+    SCRAFT          SCraft[12];
+    // 0x79D98
+    ORBMENT         Orbment[12] <optimize=true>;
+
+    FSeek(addrBase + 0x7EF78);
+    ushort          SBreak[12];     // S爆发技设定
+
+    FSeek(addrBase + 0x7D398);
+    POSITION        Position[16] <optimize=true>;   // 最后两个和Mira地址一样
+} MENU;
+
+    // ProcessHeapToLocalAddress()
+    // ProcessLocalToHeapAddress()
+    SetForeColor(cRed); // 颜色
+    local uint addrMemBase = ReadUInt(ProcessHeapToLocalAddress(0xB9A7F0));
+    local uint addrBase = ProcessHeapToLocalAddress(addrMemBase);
+
+    FSeek(addrBase + 0x3D7D8 + 0x58);
+    uint addrMemT_se <format=hex, hidden=true>;
+
+    FSeek(addrBase + 0x4D27C + 0x08);
+    uint addrMemT_item <format=hex, hidden=true>;
+    uint addrMemT_ittxt <format=hex, hidden=true>;
+    uint addrMemT_item2 <format=hex, hidden=true>;
+    uint addrMemT_ittxt2 <format=hex, hidden=true>;
+    uint addrMemT_quartz <format=hex, hidden=true>;
+    uint addrMemT_magic <format=hex, hidden=true>;
+    uint addrMemT_crfget <format=hex, hidden=true>;
+    uint addrMemT_magqrt <format=hex, hidden=true>;
+    uint addrMemT_town <format=hex, hidden=true>;
+    uint addrMemT_cook <format=hex, hidden=true>;
+    uint addrMemT_trade <format=hex, hidden=true>;
+
+    FSeek(addrBase + 0x80C88);
+    uint addrMemT_name <format=hex, hidden=true>;
+    uint addrMemT_sltget <format=hex, hidden=true>;
+    uint addrMemT_quest <format=hex, hidden=true>;
+    uint addrMemT_memo <format=hex, hidden=true>;
+    uint addrMemT_orb <format=hex, hidden=true>;
+    uint addrMemT_world <format=hex, hidden=true>;
+
+    FSeek(addrBase + 0x80CA8);
+    uint addrMemT_bgm <format=hex, hidden=true>;
+    uint addrMemT_record <format=hex, hidden=true>;
+    uint addrMemT_msas <format=hex, hidden=true>;
+
+    local uint addrMemT_mons = ReadUInt(ProcessHeapToLocalAddress(0xD3D7B8));
+    //local uint addrMemT_btrev = 
+
+    FSeek(addrBase + 0x80BE8);
+    uint addrMemTime <format=hex, hidden=true>;
+
+    FSeek(addrBase + 0x80C6C);
+    uint addrMemBattleStart <format=hex, hidden=true>;
+
+    FSeek(addrBase + 0x38498);
+    uint addrMemMarkScena1 <format=hex, hidden=true>;
+
+    FSeek(addrBase + 0x38498 + 0xA10);  // 0x38EA8
+    uint addrMemScenaFile[6] <format=hex, hidden=true>;
+
+    FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x38498) + 0x2BC));
+    uint addrMemScenaStart1 <format=hex, hidden=true>;
+    uint addrMemScenaStart2 <format=hex, hidden=true>;
+    int  scenaCharacterAmount <hidden=true>;    // 最多0x80个
+    SetForeColor(cNone);    // 颜色
+
+    // 地址转换
+    local uint addrT_se = ProcessHeapToLocalAddress(addrMemT_se);
+
+    local uint addrT_item = ProcessHeapToLocalAddress(addrMemT_item);
+    local uint addrT_ittxt = ProcessHeapToLocalAddress(addrMemT_ittxt);
+    local uint addrT_item2 = ProcessHeapToLocalAddress(addrMemT_item2);
+    local uint addrT_ittxt2 = ProcessHeapToLocalAddress(addrMemT_ittxt2);
+    local uint addrT_quartz = ProcessHeapToLocalAddress(addrMemT_quartz);
+    local uint addrT_magic = ProcessHeapToLocalAddress(addrMemT_magic);
+    local uint addrT_crfget = ProcessHeapToLocalAddress(addrMemT_crfget);
+    local uint addrT_magqrt = ProcessHeapToLocalAddress(addrMemT_magqrt);
+    local uint addrT_town = ProcessHeapToLocalAddress(addrMemT_town);
+    local uint addrT_cook = ProcessHeapToLocalAddress(addrMemT_cook);
+    local uint addrT_trade = ProcessHeapToLocalAddress(addrMemT_trade);
+
+    local uint addrT_name = ProcessHeapToLocalAddress(addrMemT_name);
+    local uint addrT_sltget = ProcessHeapToLocalAddress(addrMemT_sltget);
+    local uint addrT_quest = ProcessHeapToLocalAddress(addrMemT_quest);
+    local uint addrT_memo = ProcessHeapToLocalAddress(addrMemT_memo);
+    local uint addrT_orb = ProcessHeapToLocalAddress(addrMemT_orb);
+    local uint addrT_world = ProcessHeapToLocalAddress(addrMemT_world);
+
+    local uint addrT_bgm = ProcessHeapToLocalAddress(addrMemT_bgm);
+    local uint addrT_record = ProcessHeapToLocalAddress(addrMemT_record);
+    local uint addrT_msas = ProcessHeapToLocalAddress(addrMemT_msas);
+
+    local uint addrT_mons = ProcessHeapToLocalAddress(addrMemT_mons);
+    //local uint addrT_btrev = 
+
+    local uint addrTime = ProcessHeapToLocalAddress(addrMemTime);
+    local uint addrBattleStart = ProcessHeapToLocalAddress(addrMemBattleStart);
+    local uint addrScenaFileIndex; // 循环用
+    local uint addrScenaFile[6];
+    for (addrScenaFileIndex = 0; addrScenaFileIndex < 6; addrScenaFileIndex++)
+    {
+        addrScenaFile[addrScenaFileIndex] = ProcessHeapToLocalAddress(addrMemScenaFile[addrScenaFileIndex]);
+    }
+    ////local uint addrScenaFile = ProcessHeapToLocalAddress(addrMemScenaFile);
+    local uint addrScenaStart1 = ProcessHeapToLocalAddress(addrMemScenaStart1);
+    local uint addrScenaStart2 = ProcessHeapToLocalAddress(addrMemScenaStart2);
+
+    // 物品定义
+    FSeek(addrT_item);
+    T_item          itemTable;
+
+    // 魔法战技定义
+    FSeek(addrT_magic);
+    T_magic         magicTable;
+
+    // 角色列表
+    FSeek(addrT_name);
+    T_name          characterTable;
+
+    // 杂项
+    FSeek(addrBase);
+    MISCS           miscs;
+
+// 场景文件和战斗信息初始化 部分
+#include "zero_ao_scena.bt.h"
+
+    // 场景文件in内存
+    if (addrMemScenaFile[0] != 0)
+    {
+        // 五个可能的子文件
+        if (ReadUInt(0x20 + addrScenaFile[0]) != 0xFFFFFFFF && addrMemScenaFile[1] != 0)
+        {
+            FSeek(addrScenaFile[1]);
+            ScenaFile   scenaFile1(addrScenaFile[1]);
+        }
+        if (ReadUInt(0x24 + addrScenaFile[0]) != 0xFFFFFFFF && addrMemScenaFile[2] != 0)
+        {
+            FSeek(addrScenaFile[2]);
+            ScenaFile   scenaFile2(addrScenaFile[2]);
+        }
+        if (ReadUInt(0x28 + addrScenaFile[0]) != 0xFFFFFFFF && addrMemScenaFile[3] != 0)
+        {
+            FSeek(addrScenaFile[3]);
+            ScenaFile   scenaFile3(addrScenaFile[3]);
+        }
+        if (ReadUInt(0x2C + addrScenaFile[0]) != 0xFFFFFFFF && addrMemScenaFile[4] != 0)
+        {
+            FSeek(addrScenaFile[4]);
+            ScenaFile   scenaFile4(addrScenaFile[4]);
+        }
+        if (ReadUInt(0x30 + addrScenaFile[0]) != 0xFFFFFFFF && addrMemScenaFile[5] != 0)
+        {
+            FSeek(addrScenaFile[5]);
+            ScenaFile   scenaFile5(addrScenaFile[5]);
+        }
+
+        FSeek(addrScenaFile[0]);    // =? addrBase + 0xC3880 
+        ScenaFile   scenaFile(addrScenaFile[0]);
+
+    }
+/*
+    // 具体化的角色信息，1包括外形，2包括怪的战斗参数
+    if (addrMemScenaStart1 != 0 && scenaCharacterAmount != 0)
+    {
+        FSeek(addrScenaStart1);
+        ScenaCharacterInf1Group     scenaCharacterInf1;
+    }
+
+    if (addrMemScenaStart2 != 0 && scenaCharacterAmount != 0)
+    {
+        FSeek(addrScenaStart2);
+        ScenaCharacterInf2Group     scenaCharacterInf2;
+    }
+*/
+    
+    // 角色信息 战斗外
+    FSeek(addrBase + 0x791B8);
+    MENU            menu;
+
+    // 组队、人物替换相关
+    ////FSeek(addrBase + 0x791B8);
+    FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x38498) + 0x2CC));
+    ushort          Team[8];
+
+    FSeek(addrBase + 0x7EF60);
+    ushort          Replace[12];    // 替换形象，人物代码
+
+    // 战斗开始前生成的战斗信息
+    if (ReadByte(addrBase + 0x80D08 + 1) != 0)
+    {
+        FSeek(addrBase + 0x80D08);
+        BattleInitGroup battleInit;
+    }
+
+    // 战斗部分
+    if (addrMemBattleStart != 0)
+    {
+        local int       i = 0, j = 0;
+        local int       CHR_BATTLE_INF_SIZE = 0x243C;
+        local uint      addrChr0 = addrBattleStart + 0x4E40;
+        //FSeek(addrBattleStart + 0xAC);
+        //string            BattleMap;
+        FSeek(addrChr0);
+        for (j = 0; j == ReadUShort(FTell()); j++)
+        ////for (j = 0; j < 23; j++)
+        {
+            if (ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 16) == 0 && 
+                ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 20) == 0 &&
+                ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 24) == 0 )
+                ED7_CHARACTER_BATTLE_INF    ED7_character_battle_inf <hidden=true>;//
+            else
+                ED7_CHARACTER_BATTLE_INF    ED7_character_battle_inf;
+        }
+
+        FSeek(addrBattleStart + 0xE8750);
+        short       ChainedBattleIndex; // 连战第几场 0-2
+        
+        FSeek(addrBattleStart + 0xE8752);
+        ushort      SepithGet[7];       // 战斗结束获得的耀晶片
+        
+        ////while(ReadUShort(FTell()) > 0)
+        ////ItemInBag   ItemGet(1);
+        ItemInBag   ItemGet(0x10)[8] <optimize=true>;   // 战斗结束获得的物品，最多8种
+        
+        FSeek(addrBattleStart + 0x9C512);
+        ubyte       EscapeSuccessProbablity;    // 撤退成功率
+        
+        FSeek(addrBattleStart + 0x9C354);
+        byte        BattleStartCondition;   // 战斗开场状况 0 普通, 1 被偷袭, 02 先制, 04 奇袭, 可以锁定..
+
+/*
+        FSeek(addrBattleStart + 0xCC7C8);   // 战斗前后现场的保存与恢复. [0xB9A7F0]+0x78EEC. repe movsd 0x18F8 times/0x63E0 bytes
+        FSkip(0x4E84);
+        int         ScenaCode <format=hex>;         // 场景代码
+        int         ScenaNode;                      // 场景中的出入口代码，貌似都是从0x64开始的
+        int         ChapterIndex;                   // 章节代码，序章-3章-间章-4章-终章 0-3-4-5-6
+        int         ScenaNameIndex;                 // 场景名称代码
+        FSeek(miscs.placeTable.place[ScenaNameIndex].addrPlaceNameReal);
+        string      ScenaName;
+        FSeek(addrBattleStart + 0xCC7C8 + 4);
+    /*  FSeek(addrBattleStart + 0x38FAC);
+        int ecx;
+        FSeek(ProcessHeapToLocalAddress(ecx) + 0x608C);
+        ushort  eax;
+
+        FSeek(addrBattleStart + 0x3AAC0);
+        int         battlePar401;
+
+        FSeek(addrBattleStart + 0xE892E);
+        ushort      battleParUnknown;
+    
+        ////FSeek(addrBattleStart + 0x9BF50 + 0x1F0 + 0x96);    // 撤退按钮
+        FSeek(addrBattleStart + 0x9BF50);       
+        BattleButtonGroup   battleButton;
+
+        FSeek(addrBattleStart + 0xE88A8);   // 参数含08的话, or 00010000; 参数含02的话, or 04
+        int         battlePar1;
+        FSeek(addrBattleStart + 0xE88AE);
+        ushort      battleParameterDup;
+    */
+    }
+
+    /*
+    [[0xB9A7F0]+0x38498] == [0xB9A7F0]+0x78EEC  [05EC3608] 05F0405C
+    [[[0xB9A7F0]+0x38498]+0x2C0] = 19A7B1D0      +2BC 19A52D80      保存场景中每个角色的信息，每人18C， 敌方2BC  pmwTop/objTop
+    [[0xB9A7F0]+0x38498+9F4]    scenaFile   05F4E9F0
+    [[0xB9A7F0]+0x38498]+631D   敌方初始编号放这
+    05E8B170    
+    5F4EF10 
+
+FSeek(addrT_world);
+byte    T_world_start;
+*/
+
+
+
+
+typedef struct
+{
+    FSeek(addrBase+0xB9E24);
+    int DbgBtlFlag <format=hex>;
+    FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x38498) + (0x3E0>>3) + 0x9C));
+    byte parShiningPom;
+    FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x38498) + (0>>3) + 0x9C));
+    byte parTemp0;
+    FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x38498) + 0x2*4 + 0x4F48));
+    int par021F_0002;
+
+//  FSeek(addrBattleStart);
+//  int markAddrBattleStart;
+    FSeek(addrBattleStart + 0x9C348);
+    int atLastElapse;
+    FSeek(addrBase+0xB9E24);
+    FSeek(addrBase+0xB0068);
+    ushort  supportAtRemain;
+
+//  FSeek(addrBattleStart + 0xE8898);
+//  int supportAt350_200; //通常350AT，危急200AT 初始；支援人员数为2时，AT双倍流逝，否则1倍
+
+//  FSeek(addrBase + 0x7FD14);
+//  string keys;
+//  FSeek(addrBase + 0x7F40C);
+//  int key;    
+} Parameter;
+
+FSeek(addrBase);
+Parameter par;

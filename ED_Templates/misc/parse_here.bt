@@ -1,0 +1,9 @@
+#include "010_def.bt.h"
+
+local INT   i;
+FSeek(GetCursorPosEx());
+ULONG       p[0x3C];
+for (i = 0; i < 0x3C; ++i)
+{
+    Printf("0x%08X\n", p[i]);
+}

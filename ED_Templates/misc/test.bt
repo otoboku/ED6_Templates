@@ -1,0 +1,80 @@
+//--------------------------------------
+//--- 010 Editor v6.0.3 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+#define ED6_3RD
+#include "ED6_common.bt.h"
+typedef struct {} EMPTY;
+typedef struct
+{
+    int a;
+    int b;
+} STRUCT1 <read=readSTRUCT1>;
+
+wstring readSTRUCT1(STRUCT1 &a)
+{
+    return StringToWString("中文", CHARSET_UTF8);
+}
+
+typedef struct
+{
+    int a;
+    int b;
+} STRUCT2;
+
+typedef enum
+{
+    enum0,
+    enum1,
+    enum2,
+    enum3,
+} ENUM1 <format=hex, read=readENUM1>;
+string readENUM1(ENUM1 &a)
+{
+    return EnumToString(a);
+}
+
+EMPTY emt1;
+EMPTY emt2;
+
+STRUCT1 s1 <name=readSTRUCT1>;
+STRUCT2 s2;
+
+ENUM1 e[4];
+
+//Warning("Warning by function Warning1!\n");
+
+if ((INT)-1 > 0)
+{
+    Printf("(INT)-1 > 0\n");
+}
+if ((ULONG)-1 > 0)
+{
+    Printf("(ULONG)-1 > 0\n");
+}
+
+FileIndex file1[4];
+FileIndex file2[4];
+RESISTANCE resist1[4];
+RESISTANCE resist2[4];
+/*
+if (1)
+{
+    local int i;
+}
+local int i;*/
+
+//char    s[ReadStringLength(FTell(),4096)];
+//Printf("\r\n%d\r\n", test[0]);
+//Printf("\r\n%d\r\n", test);
+
+/*
+* 函数和结构不支持 默认参数 和 重载
+* 小结构慎用size＝,全部展开非常慢
+* <hidden=> 不支持#define
+* FSeekHeap() 失败后 FTell() = 0
+*/

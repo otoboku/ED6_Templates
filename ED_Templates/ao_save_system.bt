@@ -1,0 +1,81 @@
+#include "ED6_common.bt.h"
+
+typedef union
+{
+    //DUMMY_STRUCT(0x4C4);
+    ArrayBytes  dummy(0x4C4) <hidden=true>;
+    struct
+    {
+        DUMMY_STRUCT(0x4);
+        INT     Adapter;        // 0x4
+        INT     Device;
+        INT     Mode;
+        INT     WindowWidth;    // 0x10
+        INT     WindowHeight;   // 0x14
+        DUMMY_STRUCT(0x475-0x18);
+        BYTE    WindowMode;     // 0x475
+        DUMMY_STRUCT(0x484-0x476);
+        BYTE    BgmVolumeIni;   // 0x484    ini
+        BYTE    SeVolumeIni;    // 0x485
+        BYTE    BgmOff;         // 0x486    ini invalid
+        BYTE    SeOff;          // 0x487    ini invalid
+        DUMMY_STRUCT(0x34);
+        BYTE    BgmVolume;      // 0x4BC    81C68
+        BYTE    SeVolume;       // 0x4BD    81C69
+        DUMMY_STRUCT(0x2);
+        ULONG   Option;         // 0x4C0
+
+    } SystemConfigData;
+
+} SystemConfigData;
+
+typedef struct
+{
+    //DUMMY_STRUCT(0x38D28);
+    //ULONG   TitleVisualCount1;
+    //DUMMY_STRUCT(0x817AC - 0x38D28 - 4);
+    DUMMY_STRUCT(0x7EDD6);
+    USHORT  TitleVisualCount1;  // 0x7EDD6
+    DUMMY_STRUCT(0x817AC - 0x7EDD6 - 2);
+    //DUMMY_STRUCT(0x817AC);
+    SystemConfigData Config;    // 0x817AC
+    DUMMY_STRUCT(0xC);
+    UINT64  Record;             // 0x81C7C
+    ULONG   Tokuten;            // 0x81C84
+    ULONG   Medal;              // 0x81C88
+    DUMMY_STRUCT(0x8);
+    ULONG   GameAccount;        // 0x81C94 or je=nop
+    DUMMY_STRUCT(0x25434 - 0xC);
+    ULONG   TitleVisualCount;   // 0xA70C0
+    ULONG   ExtraMode;          // 0xA70C4
+    DUMMY_STRUCT(0x4);
+    ULONG   Unknown_4D4;        // 0xA70CC
+
+} MemorySystemData;
+
+
+typedef struct  // 0x504
+{
+    SystemConfigData Config;
+    UINT64  Record;             // 0x4C4
+    ULONG   ExtraMode;          // 0x4CC
+    ULONG   Tokuten;            // 0x4D0
+    ULONG   Unknown_4D4;        // 0x4D4
+    ULONG   Medal;              // 0x4D8
+    ULONG   TitleVisualCount;   // 0x4DC
+    ULONG   GameAccount;        // 0x4E0
+
+} LocalSystemData;
+
+
+/*
+4D0 81C84
+4CC A70C4
+4D8 81C88
+4DC A70C0
+*/
+
+if (!IsProcess() && FTell() == 0)
+{
+    LocalSystemData systemData <open=true>;
+}

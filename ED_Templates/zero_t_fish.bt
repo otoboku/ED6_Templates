@@ -1,0 +1,70 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+
+typedef struct
+{
+    ushort      unknown;
+    ushort      ItemIndex;
+    ushort      Amount;
+    ushort      dummy;
+} FishingAward;
+
+typedef struct
+{
+    ushort      ItemIndex;
+    ushort      unknown;
+} FishingBait;
+
+typedef struct
+{
+    ushort      FishIndex;
+    ushort      addrFishIntro;
+    local uint  addrFishIntroReal = addrFishIntro + addrT_fish;
+    local uint  addrTemp = FTell();
+    FSeek(addrFishIntroReal);
+    string      FishIntro;
+    FSeek(addrTemp);
+    ushort      ItemIndex;
+    ushort      unknown;
+    ushort      SizeMin;
+    ushort      SizeMax;
+    FishingAward    fishingAward[4] <optimize=true>;
+    FishingBait     fishingBait[4] <optimize=true>;
+} Fish;
+
+typedef struct
+{
+    ushort      FishingRodIndex;
+    ushort      unknown;
+    ushort      BaitCanUse[30];
+} FishingRod;
+
+typedef struct
+{
+    ushort      FishingPlaceIndex;
+    ushort      PlaceIndex;
+    ubyte       FishIndex[16];
+} FishingPlace;
+
+    local uint      addrT_fish = 0; // ÄÚ´æ±à¼­ÓÃ
+    FSeek(addrT_fish);
+
+    ushort  addrFish;
+    ushort  addrFishingRod;
+    ushort  addrFishingPlace;
+    while (ReadUShort(FTell()) != 99)
+        Fish    fish;
+
+    FSeek(addrFishingRod + addrT_fish);
+    while (ReadUShort(FTell()) != 99)
+        FishingRod  fishingRod;
+
+    FSeek(addrFishingPlace + addrT_fish);
+    while (ReadUShort(FTell()) != 99)
+        FishingPlace    fishingPlace;

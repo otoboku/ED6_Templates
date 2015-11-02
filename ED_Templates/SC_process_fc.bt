@@ -1,0 +1,10 @@
+//--------------------------------------
+//--- 010 Editor v6.0.3 Binary Template
+//
+// File: sc_process_fc.bt
+// Author: acgngca
+// Revision: 2015-10-28
+// Purpose: 整合补丁FC部分
+//--------------------------------------
+#define ED62_CN1020FC_FC_PART
+#include "sc_process.bt"

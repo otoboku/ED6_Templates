@@ -1,0 +1,137 @@
+//--------------------------------------
+//--- 010 Editor v3.2 Binary Template
+//
+// File: 碧之轨迹 MSFileTemplate.bt
+// Author:acgngca
+// Revision:2011-11-18 部分变量类型变动+统一
+// Purpose:查看编辑MSFile
+// References:  http://tieba.baidu.com/p/1117902374
+//              http://tieba.baidu.com/p/596221801  18L 20L
+//              http://tieba.baidu.com/p/708648905
+//--------------------------------------
+//#define ED6_FC        0x01
+//#define ED6_SC        0x02
+//#define ED6_3RD       0x04
+//#define ED_ZERO       0x08
+#define ED_AO       0x10
+#include "ED6_common.bt.h"
+
+/*
+typedef struct  // 文件索引
+{
+    uint  Index    :20 <format=hex>;
+    uint  FileType :12 <format=hex>;
+//  300:MS  data\battle\dat\ms12345.dat
+//  301:AS  data\battle\dat\as12345.dat
+//  302:BS  data\battle\dat\bs12345.dat
+//  310:SY  data\battle\symbol\sy12345.itp (SymbolTexture AT条头像)
+//  007:CH  data\chr\ch12345.itc    //人物素材，如在队时 站立移动时的形象
+//  008:CH  data\apl\ch12345.itc
+//  009:CH  data\monster\ch12345.itc//怪物素材，
+} FileIndex;
+*/
+
+typedef struct
+{
+    FileIndex           ASFileIndex <format=hex>;   // -301
+    ushort              Level;
+    uint                HPMax;
+    uint                HP;
+    ushort              EPMax;
+    ushort              EP;
+    ushort              CPMax;
+    ushort              CP;
+    ushort              SPD;
+    ushort              MoveSPD;                    // 移动速度
+    ushort              MOV;
+    ushort              STR;
+    ushort              DEF;    
+    ushort              ATS;
+    ushort              ADF;
+    ushort              DEX;
+    ushort              AGL;
+    ushort              RNG;
+    ushort              MoveAfterAttack;            // 被击退距离，一般为0，距离为1;设置过大会导致缓慢后退
+    ushort              EXP;                        // 经验值
+    ubyte               DUMMY_STRUCT_02[2] <hidden=true>;
+} ED7_MONSTER_STATUS1;
+
+typedef struct
+{
+    ubyte               DUMMY_STRUCT_021 <hidden=true>;
+    ushort              AIType;                     // 00 01 02 04 0A FF 控制敌方或NPC
+    ushort              Darkness <hidden=true>;     // 怪周围的暗度，正常1000
+    ubyte               DUMMY_STRUCT_03[4] <hidden=true>;   // 几乎都一样
+    ubyte               Flags;                      // 10 敌方 40 己方 ...
+    ubyte               DeathFlags;                 // 02 不参与战场胜利判定 04 死后留在战场上
+    ubyte               UnderAttackFlags;           // 08 Resist ATDelay 02 不被击退 01 无法移动(移动会卡死)  10 无法被攻击到  20 强制miss
+    ubyte               DUMMY_STRUCT_04[4] <hidden=true>;   // 0或1 人物模型显示？
+    ubyte               DisplayHighLevelArtsAttResistance  <hidden=true>;      
+                                                    // 是否开启时空幻有效率显示，0/8 不开启 1/9 开启，应该是标志位，可能含有更多信息
+    ubyte               Sex;                        // 0 男 1 女 //确定！！！
+    uint                Size <hidden=true>;         // 占地大小，1格400 高达1200
+    ubyte               DUMMY_STRUCT_05[4] <hidden=true>;
+    uint                Height <hidden=true>;       // 高度，选中目标时箭头离地高度，正常800
+//  ushort              CharSize;                   // 占 CharSize / 2 / 400 格   //???
+    ubyte               DUMMY_STRUCT_06[4] <hidden=true>;
+    ubyte               ConditionDisplayPosition[4]  <hidden=true>;
+                                                    // 状态在头顶的显示位置 左右/前后/左右/未知 60/50/A0/B0 10/00/F0/FF
+//  FileIndex           SYFileIndex;
+    FileIndex           SymbolTextureFileIndex <format=hex>;    // -310 AT条头像
+    RESISTANCE          Resistance;                 // 异常状态抗性
+//  ubyte               DUMMY_STRUCT_07[11] <hidden=true>;
+    ushort              ArtsAttResistance[7];       // 七曜属性有效率
+    ubyte               Sepith[7];                  // 掉落耀晶片
+    ushort              DropIndex1;                 // 掉落物 物品代码
+    ushort              DropIndex2;
+    ubyte               DropProbability1;           // 掉落概率
+    ubyte               DropProbability2;
+    ushort              Equip[5];                   // 装备
+    ushort              Orb[4];                     // 回路
+} ED7_MONSTER_STATUS2;
+
+typedef struct
+{
+    ED7_AI_INFO         NormalAttack;               // 攻击
+
+    ubyte               ArtCount;                   // 魔法, 最多80个
+    if(ArtCount > 0)
+    {
+        ED7_AI_INFO     Art[ArtCount];
+    }
+
+    ubyte               CraftCount;                 // 战技, 最多10个
+    if(CraftCount > 0)
+    {
+        ED7_AI_INFO     Craft[CraftCount];
+    }
+
+    ubyte               SCraftCount;                // S技, 最多5个
+    if(SCraftCount > 0)
+    {
+        ED7_AI_INFO     SCraft[SCraftCount];
+    }
+
+    ubyte               SupportCraftCount;          // 支援战技, 最多3个
+    if(SupportCraftCount > 0)
+    {
+        ED7_AI_INFO     SupportCraft[SupportCraftCount]; 
+    }
+} ED7_MONSTER_Ai;
+
+typedef struct
+{
+    ubyte               CraftCount;                 // 自定义技能, 最多15个??
+    if(CraftCount > 0)
+    {
+        ED7_CRAFT_INFO  Craft[CraftCount] <optimize=false>;
+    }
+} ED7_MONSTER_CRAFT;
+
+    ED7_MONSTER_STATUS1 ED7_monster_status1; // <open=true>;
+    ED7_MONSTER_STATUS2 ED7_monster_status2;
+    ED7_MONSTER_Ai      ED7_monster_ai;
+    ED7_MONSTER_CRAFT   ED7_monster_craft;
+    FleeParameter       fleeParameter;  // 逃跑参数 03320000 每次行动50%概率逃跑; 01320A00 血量10%以下50%概率逃跑
+    string              MonsterName;
+    string              MonsterIntro;
