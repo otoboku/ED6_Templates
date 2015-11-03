@@ -6,101 +6,20 @@
 // Revision:
 // Purpose:
 //--------------------------------------
+#ifndef ED_VERSION
+#define ED6_3RD
+#endif
+#include "ED6_common.bt.h"
 
-typedef struct  //øπ–‘
-{
-    uint    CONDITION_POISON                 : 1;   // ∂æ
-    uint    CONDITION_FROZEN                 : 1;   // ∂≥Ω·
-    uint    CONDITION_LANDIFICATION          : 1;   //  ØªØ
-    uint    CONDITION_SLEEPING               : 1;   // ÀØ√ﬂ
-    uint    CONDITION_DISABLE_ARTS           : 1;   // ∑‚ƒß
-    uint    CONDITION_DARKNESS               : 1;   // ∫⁄∞µ
-    uint    CONDITION_DISABLE_CRAFT          : 1;   // ∑‚ºº
-    uint    CONDITION_CHAOS                  : 1;   // ªÏ¬“
-    uint    CONDITION_STUN                   : 1;   // ∆¯æ¯
-    uint    CONDITION_SECOND_KILL            : 1;   // º¥À¿
-    uint    CONDITION_DEF_DOWN_FORCE         : 1;   // æ¯∂‘Ωµ∑¿
-    uint    CONDITION_RAGE                   : 1;   // ∑ﬂ≈≠
-    uint    CONDITION_ARTS_GUARD             : 1;   // ArtGuard
-    uint    CONDITION_CRAFT_GUARD            : 1;   // CraftGuard
-    uint    CONDITION_MOV_UP                 : 1;
-    uint    CONDITION_MOV_DOWN               : 1;
-    uint    CONDITION_STR_UP                 : 1;
-    uint    CONDITION_STR_DOWN               : 1;
-    uint    CONDITION_DEF_UP                 : 1;
-    uint    CONDITION_DEF_DOWN               : 1;
-    uint    CONDITION_SPD_UP                 : 1;
-    uint    CONDITION_SPD_DOWN               : 1;
-    uint    CONDITION_ADF_UP                 : 1;
-    uint    CONDITION_ADF_DOWN               : 1;
-    uint    CONDITION_AGL_UP                 : 1;
-    uint    CONDITION_AGL_DOWN               : 1;
-    uint    CONDITION_MAX_GUARD              : 1;   // «Ω
-    uint    CONDITION_VANISH                 : 1;   // Vanish
-    uint    CONDITION_CONDITION_GUARD        : 1;   // »´◊¥Ã¨µ÷øπ
-    uint    CONDITION_FAT                    : 1;   // ±‰≈÷/±‰–°
-    uint    CONDITION_ATS_UP                 : 1;
-    uint    CONDITION_FORCE_SECOND_KILL      : 1;   // only valid in AS file
-} RESISTANCE;
-
-typedef struct
-{
-    uint                Level;
-    uint                HPMax;
-    uint                HP;
-    ushort              EPMax;
-    ushort              EP;
-    ushort              CP;
-    ubyte               DUMMY_STRUCT_01[2];
-    uint                EXP;    
-    ushort              STR;
-    ushort              DEF;
-    ushort              ATS;
-    ushort              ADF;
-    ushort              DEX;
-    ushort              AGL;
-    ushort              MOV;
-    ushort              SPD;
-    ushort              CPMAX;
-    ubyte               DUMMY_STRUCT_02[4];
-    ushort              RGN;
-    ubyte               DUMMY_STRUCT_03[4];
-    RESISTANCE          condition;  // RESISTANCE¿‡–Õ£¨Ω¯≥Ã÷–”––ß
-    ushort              CharacterIndex;
-    ubyte               DUMMY_STRUCT_04[2];
-} STATUS;;
-                    
-typedef struct
-{
-    ushort              character1;
-    ushort              character2;
-    ushort              character3;
-    ushort              character4;     
-} TEAM_GROUP;
-
-typedef struct  //’æŒª
-{
-    ubyte       x;  //◊Ûœ¬Ω«Œ™00£¨◊Û”“Œ™x£¨…œœ¬Œ™y
-    ubyte       y;
-} POSITION <read=readPosition>;
-
-string readPosition(POSITION &a)
-{
-    string s;
-    SPrintf(s,"%d %d", a.x, a.y);
-    return  s;
-};
-
-
-    FSeek(0x1F42C);
-    uint            TeamNow[16];
-    TEAM_GROUP      TeamFinal[4];
-    STATUS          Status[32];
-    FSeek(0x27F4A);
-    POSITION        position[32];
-    FSeek(0x280AC);
-    ushort          SBreak[32];
-    FSeek(0x2810E);
-    ushort          Replace[32];    //–ﬁ¬ﬁµƒ’Ê◊ÀÃÊªª 23 00h
-    FSeek(0x28C5A);
-    //ubyte         SupportCharacter[4];
+FSeek(0x1F42C);
+uint            TeamNow[16];
+TEAM_GROUP      TeamFinal[4];
+STATUS          Status[32];
+FSeek(0x27F4A);
+POSITION        position[32];
+FSeek(0x280AC);
+ushort          SBreak[32];
+FSeek(0x2810E);
+ushort          Replace[32];    //‰øÆÁΩóÁöÑÁúüÂßøÊõøÊç¢ 23 00h
+FSeek(0x28C5A);
+//ubyte         SupportCharacter[4];

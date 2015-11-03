@@ -401,7 +401,7 @@ string readCONDITION(CONDITION &a)
 
 void writeCONDITION(CONDITION &a, string s) {};
 
-// 逃跑参数
+// 逃跑参数 03320000 每次行动50%概率逃跑; 01320A00 血量10%以下50%概率逃跑; 02320000 头头死亡后50%概率逃跑
 typedef UCHAR RUNAWAY_INFO[4]  <read=readRUNAWAY_INFO, write=writeRUNAWAY_INFO>;
 typedef RUNAWAY_INFO    FleeParameter;
 
@@ -443,7 +443,7 @@ typedef struct  // Ai格式
     AI_PAR  TargetParameter1;
     AI_PAR  TargetParameter2;
 } ED6_AI_INFO <read=readCraftIndex>;
-typedef ED6_AI_INFO ED7_AI_INFO;
+typedef ED6_AI_INFO ED7_AI_INFO, AI_INFO;
 
 string readCraftIndex(ED6_AI_INFO &a)
 {

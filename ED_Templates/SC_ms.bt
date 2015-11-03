@@ -1,16 +1,17 @@
 //--------------------------------------
 //--- 010 Editor v3.2 Binary Template
 //
-// File:¿ÕÖ®¹ì¼£SC MSFileTemplate.bt
+// File:ç©ºä¹‹è½¨è¿¹SC MSFileTemplate.bt
 // Author:acgngca
-// Revision:2011-07-20 ´Ó3rdÖ±½Ó¸ÄµÄ£¬Ai Õ½¼¼¶ÔµÃÉÏ£¬ÆäËüÎ´ÑéÖ¤
-// Purpose:²é¿´±à¼­MSFile
+// Revision:2011-07-20 ä»3rdç›´æ¥æ”¹çš„ï¼ŒAi æˆ˜æŠ€å¯¹å¾—ä¸Šï¼Œå…¶å®ƒæœªéªŒè¯
+// Purpose:æŸ¥çœ‹ç¼–è¾‘MSFile
 // References:  http://tieba.baidu.com/p/1117902374
 //              http://tieba.baidu.com/p/596221801  18L 20L
 //              http://tieba.baidu.com/p/708648905
 //--------------------------------------
-
+#ifndef ED_VERSION
 #define ED6_SC
+#endif
 #include "ED6_common.bt.h"
 
 typedef struct
@@ -24,7 +25,7 @@ typedef struct
     ushort              CPMax;
     ushort              CP;
     ushort              SPD;
-    ushort              MoveSPD;                // ÒÆ¶¯ËÙ¶È
+    ushort              MoveSPD;                // ç§»åŠ¨é€Ÿåº¦
     ushort              MOV;
     ushort              STR;
     ushort              DEF;
@@ -33,58 +34,58 @@ typedef struct
     ushort              DEX;
     ushort              AGL;
     ushort              RNG;
-    ushort              MoveAfterAttack;        // ±»»÷ÍË¾àÀë£¬Ò»°ãÎª0£¬¾àÀëÎª1;ÉèÖÃ¹ı´ó»áµ¼ÖÂ»ºÂıºóÍË
-    ushort              EXP;                    // ¾­ÑéÖµ,(µĞ·½µÈ¼¶-ÒÑ·½µÈ¼¶) * EXP
-    ubyte               DUMMY_STRUCT_02[2] <hidden=true>; //È«0
+    ushort              MoveAfterAttack;        // è¢«å‡»é€€è·ç¦»ï¼Œä¸€èˆ¬ä¸º0ï¼Œè·ç¦»ä¸º1;è®¾ç½®è¿‡å¤§ä¼šå¯¼è‡´ç¼“æ…¢åé€€
+    ushort              EXP;                    // ç»éªŒå€¼,(æ•Œæ–¹ç­‰çº§-å·²æ–¹ç­‰çº§) * EXP
+    ubyte               DUMMY_STRUCT_02[2] <hidden=true>; //å…¨0
 } ED6_MONSTER_STATUS1;
 
 typedef struct
 {
     ushort              AIType;                     // 0x00 0x01 0x02 0x10 0x13 0x14 0xFF
-    ushort              Darkness <hidden=true>;     // ¹ÖÖÜÎ§µÄ°µ¶È£¬Õı³£1000
-    ubyte               DUMMY_STRUCT_03[4] <hidden=true>;   // ¼¸ºõ¶¼Ò»Ñù µÚÒ»¸ö×Ö½Ú¿ØÖÆĞü¸¡£¿
-    ubyte               Flags;                      // 10 µĞ·½ 40 ¼º·½ 20 NPC 80ÌÓÅÜ...
-    ubyte               DeathFlags;                 // 02 ²»²ÎÓëÕ½³¡Ê¤ÀûÅĞ¶¨ 04 ËÀºóÁôÔÚÕ½³¡ÉÏ
-    ubyte               UnderAttackFlags;           // 0x08 Risist ATDelay 0x02 ²»±»»÷ÍË 0x01 ±»¹¥»÷²»×ªÉí(3D)  0x10 ÎŞ·¨±»¹¥»÷µ½  0x20 Ç¿ÖÆmiss
+    ushort              Darkness <hidden=true>;     // æ€ªå‘¨å›´çš„æš—åº¦ï¼Œæ­£å¸¸1000
+    ubyte               DUMMY_STRUCT_03[4] <hidden=true>;   // å‡ ä¹éƒ½ä¸€æ · ç¬¬ä¸€ä¸ªå­—èŠ‚æ§åˆ¶æ‚¬æµ®ï¼Ÿ
+    ubyte               Flags;                      // 10 æ•Œæ–¹ 40 å·±æ–¹ 20 NPC 80é€ƒè·‘...
+    ubyte               DeathFlags;                 // 02 ä¸å‚ä¸æˆ˜åœºèƒœåˆ©åˆ¤å®š 04 æ­»åç•™åœ¨æˆ˜åœºä¸Š
+    ubyte               UnderAttackFlags;           // 0x08 Risist ATDelay 0x02 ä¸è¢«å‡»é€€ 0x01 è¢«æ”»å‡»ä¸è½¬èº«(3D)  0x10 æ— æ³•è¢«æ”»å‡»åˆ°  0x20 å¼ºåˆ¶miss
     ubyte               DUMMY_STRUCT_04[6] <hidden=true>;
-    ubyte               Sex;                        // 0 ÄĞ 1 Å® //È·¶¨£¡£¡£¡  ²»×¼È·
-    uint                Size;                       // Õ¼µØ´óĞ¡£¬1¸ñ400 ¸ß´ï1200
-    ubyte               DUMMY_STRUCT_05[4] <hidden=true>;   //È«0
-    uint                Height <hidden=true>;       // ¸ß¶È£¬Ñ¡ÖĞÄ¿±êÊ±¼ıÍ·ÀëµØ¸ß¶È£¬Õı³£800
-//  ushort              CharSize;                   // Õ¼ CharSize / 2 / 400 ¸ñ   //???
-    ubyte               DUMMY_STRUCT_06[4] <hidden=true>;   // È«0³ı£Ò-¾ŞÊŞ,£Ä¡¤»ÃÓ°,¼«ÏŞ¼¶ÁãÊ½,°Â¶û½ÜÓÈ£Í£Ë¢ò,ºÚ°µ½µÁÙÕß
+    ubyte               Sex;                        // 0 ç”· 1 å¥³ //ç¡®å®šï¼ï¼ï¼  ä¸å‡†ç¡®
+    uint                Size;                       // å åœ°å¤§å°ï¼Œ1æ ¼400 é«˜è¾¾1200
+    ubyte               DUMMY_STRUCT_05[4] <hidden=true>;   //å…¨0
+    uint                Height <hidden=true>;       // é«˜åº¦ï¼Œé€‰ä¸­ç›®æ ‡æ—¶ç®­å¤´ç¦»åœ°é«˜åº¦ï¼Œæ­£å¸¸800
+//  ushort              CharSize;                   // å  CharSize / 2 / 400 æ ¼   //???
+    ubyte               DUMMY_STRUCT_06[4] <hidden=true>;   // å…¨0é™¤ï¼²-å·¨å…½,ï¼¤Â·å¹»å½±,æé™çº§é›¶å¼,å¥¥å°”æ°å°¤ï¼­ï¼«â…¡,é»‘æš—é™ä¸´è€…
     ubyte               ConditionDisplayPosition[4]  <hidden=true>;
-                                                    // ×´Ì¬ÔÚÍ·¶¥µÄÏÔÊ¾Î»ÖÃ ×óÓÒ/Ç°ºó/×óÓÒ/Î´Öª 60/50/A0/B0 10/00/F0/FF
-    FileIndex           SYFileIndex;                // ATÌõÍ·Ïñ
-    RESISTANCE          Resistance;                 // Òì³£×´Ì¬¿¹ĞÔ
+                                                    // çŠ¶æ€åœ¨å¤´é¡¶çš„æ˜¾ç¤ºä½ç½® å·¦å³/å‰å/å·¦å³/æœªçŸ¥ 60/50/A0/B0 10/00/F0/FF
+    FileIndex           SYFileIndex;                // ATæ¡å¤´åƒ
+    RESISTANCE          Resistance;                 // å¼‚å¸¸çŠ¶æ€æŠ—æ€§
     ubyte               DUMMY_STRUCT_07[11] <hidden=true>;
-    ushort              ArtsAttResistance[4];       // Æßê×ÊôĞÔÓĞĞ§ÂÊ
-    ubyte               Sepith[7];                  // µôÂäÒ«¾§Æ¬
-    ushort              DropIndex[2];               // µôÂäÎï
-    ubyte               DropProbability[2];         // µôÂä¸ÅÂÊ
-    WORD                Equip[5];                   // ×°±¸
-    WORD                Orb[4];                     // »ØÂ·
+    ushort              ArtsAttResistance[4];       // ä¸ƒæ›œå±æ€§æœ‰æ•ˆç‡
+    ubyte               Sepith[7];                  // æ‰è½è€€æ™¶ç‰‡
+    ushort              DropIndex[2];               // æ‰è½ç‰©
+    ubyte               DropProbability[2];         // æ‰è½æ¦‚ç‡
+    WORD                Equip[5];                   // è£…å¤‡
+    WORD                Orb[4];                     // å›è·¯
 } ED6_MONSTER_STATUS2;
 
 typedef struct
 {
-    ED6_AI_INFO         NormalAttack;               // ¹¥»÷
+    ED6_AI_INFO         NormalAttack;               // æ”»å‡»
 
-    ubyte               DUMMY_STRUCT_09[8] <hidden=true>; //È«0
+    ubyte               DUMMY_STRUCT_09[8] <hidden=true>; //å…¨0
 
-    ubyte               ArtCount;                   // Ä§·¨, ×î¶à80¸ö
+    ubyte               ArtCount;                   // é­”æ³•, æœ€å¤š80ä¸ª
     if(ArtCount > 0)
     {
         ED6_AI_INFO     Art[ArtCount];
     }
 
-    ubyte               CraftCount;                 // Õ½¼¼, ×î¶à10¸ö
+    ubyte               CraftCount;                 // æˆ˜æŠ€, æœ€å¤š10ä¸ª
     if(CraftCount > 0)
     {
         ED6_AI_INFO     Craft[CraftCount];
     }
 
-    ubyte               SCraftCount;                // S¼¼, ×î¶à5¸ö
+    ubyte               SCraftCount;                // SæŠ€, æœ€å¤š5ä¸ª
     if(SCraftCount > 0)
     {
         ED6_AI_INFO     SCraft[SCraftCount];
@@ -93,7 +94,7 @@ typedef struct
 
 typedef struct
 {
-    ubyte               CraftCount;                 // ×Ô¶¨Òå¼¼ÄÜ, ×î¶à15¸ö??
+    ubyte               CraftCount;                 // è‡ªå®šä¹‰æŠ€èƒ½, æœ€å¤š15ä¸ª??
     if(CraftCount > 0)
     {
         ED6_CRAFT_INFO  Craft[CraftCount] <optimize=false>;
@@ -104,7 +105,7 @@ typedef struct
     ED6_MONSTER_STATUS2 ED6_monster_status2;
     ED6_MONSTER_Ai      ED6_monster_ai;
     ED6_MONSTER_CRAFT   ED6_monster_craft;
-    ArrayBytes          fleeParameter(4);  // ÌÓÅÜ²ÎÊı 03320000 Ã¿´ÎĞĞ¶¯50%¸ÅÂÊÌÓÅÜ; 01320A00 ÑªÁ¿10%ÒÔÏÂ50%¸ÅÂÊÌÓÅÜ; 02320000 Í·Í·ËÀÍöºó50%¸ÅÂÊÌÓÅÜ
+    RUNAWAY_INFO        RunawayInfo;
     string              MonsterName;
     string              MonsterIntro;
 

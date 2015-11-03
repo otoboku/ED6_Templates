@@ -1,14 +1,16 @@
 //--------------------------------------
 //--- 010 Editor v3.2 Binary Template
 //
-// File: zero_ao_scena.bt.h
+// File: zero_ao_scena.bt
 // Author:acgngca
 // Revision:2011-11-22
-// Purpose:
+// Purpose:data\scena\xxxxx.bin
 // Readme:
 //
 //--------------------------------------
-
+#ifndef ED_VERSION
+#define ED_ZERO
+#endif
 #include "ED6_common.bt.h"
 
 // 场景文件和战斗信息初始化 部分
@@ -821,4 +823,9 @@ typedef struct
 string readBattleInitGroup(BattleInitGroup &a)
 {
     return  "战斗初始化信息";
+}
+
+if (!IsProcess() && FTell() == 0)
+{
+    ScenaFile   scenaFile(0) <open=true>;
 }

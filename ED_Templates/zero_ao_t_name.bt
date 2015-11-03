@@ -6,7 +6,9 @@
 // Revision:
 // Purpose:
 //--------------------------------------
-#define ED_ZERO_AO
+#ifndef ED_VERSION
+#define ED_ZERO
+#endif
 #include "ED6_common.bt.h"
 
 typedef struct(int parCHARACTER)    // 0x14 bytes
