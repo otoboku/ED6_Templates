@@ -1201,7 +1201,7 @@ typedef struct
     MISCS           miscs;
 
 // 场景文件和战斗信息初始化 部分
-#include "zero_ao_scena.bt.h"
+#include "zero_ao_scena.bt"
 
     // 场景文件in内存
     if (addrMemScenaFile[0] != 0)
