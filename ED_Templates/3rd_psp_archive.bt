@@ -1,0 +1,72 @@
+//--------------------------------------
+//--- 010 Editor v6.0.3 Binary Template
+//
+// File: 3rd_psp_archive.bt
+// Author: acgngca
+// Revision:
+// Purpose:
+//--------------------------------------
+#include "010_def.bt.h"
+
+typedef struct(ULONG parIndex)  // 0x20
+{
+    CHAR    FileName[0x10];
+    ULONG   Offset;             // 0x10
+    ULONG   FileSize;           // 0x14
+    ULONG   FileSizeUnpacked;   // 0x18
+    ULONG_H ULong_1C;           // 0x1C
+
+    FSeek(Offset);
+
+    if (FileNameGetExtension(FileName) != ".itp")
+    {
+        ULONG   FileSize;
+        ULONG   FileSizeUnpacked;
+        ULONG   Type;
+        USHORT  FileSize;
+        USHORT  UShort_0E;
+        FSkip(-0x10);
+
+        if (FileSize[0] - FileSize[1] != 4)
+        {
+            Printf("%16s: FileSize[0] - FileSize[1] != 4\n", this.FileName);
+        }
+
+        if (FileSizeUnpacked[0] != 0 && FileSizeUnpacked[0] != FileSizeUnpacked[1])
+        {
+            Printf("%16s: FileSizeUnpacked[0] != FileSizeUnpacked[1]\n", this.FileName);
+        }
+
+        Printf("%16s: %02d 0x%06x 0x%04X\n", FileName, Type, FileSize[1]-FileSize[2], UShort_0E);
+    }
+
+    UCHAR   data[FileSize[0]];
+
+    if (ULong_1C != 0)
+    {
+        Printf("%16s: ULong_1C !=0 = %#x\n", this.FileName, this.ULong_1C);
+    }
+
+    FSeek(startof(this) + 0x20);
+} ED6_PSP_ARCHIVE_ENTRY <read=readED6_PSP_ARCHIVE_ENTRY, write=writeED6_PSP_ARCHIVE_ENTRY>;
+
+string readED6_PSP_ARCHIVE_ENTRY(ED6_PSP_ARCHIVE_ENTRY &a)
+{
+    return  a.FileName;
+}
+void  writeED6_PSP_ARCHIVE_ENTRY(ED6_PSP_ARCHIVE_ENTRY &a, string s) {};
+
+local ULONG i;
+ULONG       count[4];
+for (i = 1; i < 4; ++i)
+{
+    if (count[i] != count[0])
+    {
+        Printf("count[%d] != count[0]\n", i);
+    }
+}
+
+for (i = 0; i < count[0]; ++i)
+{
+    ED6_PSP_ARCHIVE_ENTRY  file(i);
+}

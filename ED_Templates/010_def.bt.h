@@ -18,6 +18,70 @@
     common types
 *******************************************************************************/
 
+// hidden
+typedef char        char_h      <open=suppress, hidden=true>;
+typedef byte        byte_h      <open=suppress, hidden=true>;
+typedef CHAR        CHAR_H      <open=suppress, hidden=true>;
+typedef BYTE        BYTE_H      <open=suppress, hidden=true>;
+
+typedef uchar       uchar_h     <open=suppress, hidden=true>;
+typedef ubyte       ubyte_h     <open=suppress, hidden=true>;
+typedef UCHAR       UCHAR_H     <open=suppress, hidden=true>;
+typedef UBYTE       UBYTE_H     <open=suppress, hidden=true>;
+
+typedef short       short_h     <open=suppress, hidden=true>;
+typedef int16       int16_h     <open=suppress, hidden=true>;
+typedef SHORT       SHORT_H     <open=suppress, hidden=true>;
+typedef INT16       INT16_H     <open=suppress, hidden=true>;
+
+typedef ushort      ushort_h    <open=suppress, hidden=true>;
+typedef uint16      uint16_h    <open=suppress, hidden=true>;
+typedef USHORT      USHORT_H    <open=suppress, hidden=true>;
+typedef UINT16      UINT16_H    <open=suppress, hidden=true>;
+typedef WORD        WORD_H      <open=suppress, hidden=true>;
+
+typedef int         int_h       <open=suppress, hidden=true>;
+typedef int32       int32_h     <open=suppress, hidden=true>;
+typedef long        long_h      <open=suppress, hidden=true>;
+typedef INT         INT_H       <open=suppress, hidden=true>;
+typedef INT32       INT32_H     <open=suppress, hidden=true>;
+typedef LONG        LONG_H      <open=suppress, hidden=true>;
+
+typedef uint        uint_h      <open=suppress, hidden=true>;
+typedef uint32      uint32_h    <open=suppress, hidden=true>;
+typedef ulong       ulong_h     <open=suppress, hidden=true>;
+typedef UINT        UINT_H      <open=suppress, hidden=true>;
+typedef UINT32      UINT32_H    <open=suppress, hidden=true>;
+typedef ULONG       ULONG_H     <open=suppress, hidden=true>;
+typedef DWORD       DWORD_H     <open=suppress, hidden=true>;
+
+typedef int64       int64_h     <open=suppress, hidden=true>;
+typedef quad        quad_h      <open=suppress, hidden=true>;
+typedef QUAD        QUAD_H      <open=suppress, hidden=true>;
+typedef INT64       INT64_H     <open=suppress, hidden=true>;
+typedef __int64     __int64_h   <open=suppress, hidden=true>;
+
+typedef uint64      uint64_h    <open=suppress, hidden=true>;
+typedef uquad       uquad_h     <open=suppress, hidden=true>;
+typedef UQUAD       UQUAD_H     <open=suppress, hidden=true>;
+typedef UINT64      UINT64_H    <open=suppress, hidden=true>;
+typedef QWORD       QWORD_H     <open=suppress, hidden=true>;
+typedef __uint64    __uint64_h  <open=suppress, hidden=true>;
+
+typedef float       float_h     <open=suppress, hidden=true>;
+typedef FLOAT       FLOAT_H     <open=suppress, hidden=true>;
+
+typedef double      double_h    <open=suppress, hidden=true>;
+typedef DOUBLE      DOUBLE_H    <open=suppress, hidden=true>;
+
+typedef hfloat      hfloat_h    <open=suppress, hidden=true>;
+typedef HFLOAT      HFLOAT_H    <open=suppress, hidden=true>;
+
+typedef string      string_h    <open=suppress, hidden=true>;
+typedef wstring     wstring_h   <open=suppress, hidden=true>;
+typedef wchar_t     wchar_t_h   <open=suppress, hidden=true>;
+
+
 // typedef $1\t\t$1\t\t<open=suppress>;\r\n
 typedef char        char        <open=suppress>;
 typedef byte        byte        <open=suppress>;
@@ -76,7 +140,6 @@ typedef DOUBLE      DOUBLE      <open=suppress>;
 
 typedef hfloat      hfloat      <open=suppress>;
 typedef HFLOAT      HFLOAT      <open=suppress>;
-
 
 typedef string      string      <open=suppress>;
 typedef wstring     wstring     <open=suppress>;

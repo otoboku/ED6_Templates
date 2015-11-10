@@ -49,7 +49,13 @@ typedef struct  // 0x24
 
 string readED6_DIR_FILE_ENTRY(ED6_DIR_FILE_ENTRY &a)
 {
-    return  a.FileName;
+    if (a.FileSize == 0)
+    {
+        return a.FileName + " nul";
+    }
+    string  str;
+    SPrintf(str, "%-16s%s", a.FileName, TimeTToString(a.Time));
+    return  str;
 }
 void writeED6_DIR_FILE_ENTRY(ED6_DIR_FILE_ENTRY &a, string s) {};
 

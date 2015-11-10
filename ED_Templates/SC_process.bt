@@ -20,6 +20,7 @@
 #include "3rd_t_se.bt"
 #include "sc_t_item.bt"
 #include "sc_t_item2.bt"
+#include "zero_ao_t_town.bt"
 
 #ifndef ED62_CN1020FC_FC_PART
 #include "3rd_t_btset.bt"
@@ -197,6 +198,37 @@ else if (g_GameVersion == ed62steam151029)
     FSeekHeap(0x5D9368);   PTR32_HIDE   addrT_chain    ;
     FSeekHeap(0x5D9358);   PTR32_HIDE   addrT_fish     ;
 }
+else if (g_GameVersion == ed62gog151029)
+{
+    FSeekHeap(0x5DC400);   PTR32_HIDE   addrT_name     ;    // 0x220000
+    FSeekHeap(0x5DC3F8);   PTR32_HIDE   addrT_item     ;    // 0x220001
+    FSeekHeap(0x5DC3EC);   PTR32_HIDE   addrT_item2    ;    // 0x22000E
+    FSeekHeap(0x5DC3E8);   PTR32_HIDE   addrT_magic    ;    // 0x220002
+    FSeekHeap(0x5DC3F0);   PTR32_HIDE   addrT_btset1   ;    // 0x220004
+    FSeekHeap(0x5DC870);   PTR32_HIDE   addrT_btset2   ;    // 0x220025
+    FSeekHeap(0x5DC648);   PTR32_HIDE   addrT_face     ;    // 0x220005
+    FSeekHeap(0x5DC984);   PTR32_HIDE   addrT_town     ;    // 0x220006
+    FSeekHeap(0x5DC3FC);   PTR32_HIDE   addrT_quest    ;    // 0x220007
+    FSeekHeap(0x5DC878);   PTR32_HIDE   addrT_quest1   ;    // 0x220023
+    FSeekHeap(0x5DC868);   PTR32_HIDE   addrT_quest2   ;    // 0x220030
+    FSeekHeap(0x5DC650);   PTR32_HIDE   addrT_exp      ;    // 0x22000D
+    FSeekHeap(0x5DC99C);   PTR32_HIDE   addrT_status   ;    // 0x220008
+    FSeekHeap(0x5DC664);   PTR32_HIDE   addrT_orb      ;    // 0x220010
+    FSeekHeap(0x5DC660);   PTR32_HIDE   addrT_sltget   ;    // 0x22000A
+    FSeekHeap(0x5DC0DC);   PTR32_HIDE   addrT_quartz   ;    // 0x22000F
+    FSeekHeap(0x5DC644);   PTR32_HIDE   addrT_cook2    ;    // 0x220011
+    FSeekHeap(0x5DC658);   PTR32_HIDE   addrT_cook     ;    // 0x220012
+    FSeekHeap(0x5DC64C);   PTR32_HIDE   addrT_memo     ;    // 0x220013
+    FSeekHeap(0x5DC86C);   PTR32_HIDE   addrT_memo1    ;    // 0x220024
+    FSeekHeap(0x5DC404);   PTR32_HIDE   addrT_bgmtbl   ;    // 0x220014
+    FSeekHeap(0x5DC874);   PTR32_HIDE   addrT_magqrt   ;    // 0x220015
+    FSeekHeap(0x5DC87C);   PTR32_HIDE   addrT_crfget   ;    // 0x22000B
+    FSeekHeap(0x5DC0E4);   PTR32_HIDE   addrT_book00   ;    // 0x220016
+    FSeekHeap(0x5DC41C);   PTR32_HIDE   addrT_se       ;    // 0x220003
+    FSeekHeap(0x5DC0CC);   PTR32_HIDE   addrT_world    ;    // 0x220020
+    FSeekHeap(0x5DC990);   PTR32_HIDE   addrT_chain    ;    // 0x220022
+    FSeekHeap(0x5DC980);   PTR32_HIDE   addrT_fish     ;    // 0x220021
+}
 
 local PTR32 addrCBattle             = -1;
 local PTR32 addrCBattleATBar        = -1;
@@ -227,8 +259,8 @@ else if (g_GameVersion == ed62jp1020)
 }
 else if (g_GameVersion == ed62steam151029)
 {
-    addrCBattle             = 0x5F0B60;
-    addrDifficulty          = 0x2900CA5;
+    //addrCBattle             = 0x5F0B60;
+    //addrDifficulty          = 0x2900CA5;
 }
 
 if ((g_GameVersion & ed62steam) == ed62steam)
@@ -241,6 +273,15 @@ if ((g_GameVersion & ed62steam) == ed62steam)
         {
             addrDirTable            = ReadUInt(addrFind + 3 + 7 + 3);
             addrDirEntryCountTable  = ReadUInt(addrFind + 3 + 3);
+        }
+    }
+
+    // find addrCBattle
+    {
+        addrFind = FindFirst("83 C1 58 83 EA 01 79 F3 B8,h", true, false, FINDMETHOD_NORMAL, 0, 1, ProcessHeapToLocalAddress(0x401000), 0x200000);
+        if (addrFind > 0)
+        {
+            addrCBattle = ReadUInt(addrFind + 9);
         }
     }
 
@@ -282,6 +323,15 @@ if ((g_GameVersion & ed62steam) == ed62steam)
             addrTeam = ReadUInt(addrFind + 13);
         }
     }
+
+    // find addrDifficulty
+    {
+        addrFind = FindFirst("C7 44 24 04 00 00 00 00 C7 44 24 08 FC FF FF FF C7 44 24 0C F7 FF FF FF,h", true, false, FINDMETHOD_NORMAL, 0, 1, ProcessHeapToLocalAddress(0x401000), 0x200000);
+        if (addrFind > 0)
+        {
+            addrDifficulty = ReadUInt(addrFind - 4);
+        }
+    }
 }
 
 if (exists(addrT_name))
@@ -321,6 +371,9 @@ if (FSeekHeap(addrTextTable) != -1)
 
     FSeekHeap(addrT_se);
     T_se            seTable;
+
+    FSeekHeap(addrT_town);
+    T_town          townTable;
 }
 
 if (FSeekHeap(addrDirEntryCountTable) != -1 && FSeekHeap(addrDirTable) != -1)

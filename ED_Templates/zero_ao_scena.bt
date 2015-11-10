@@ -452,7 +452,7 @@ typedef struct(uint parScenaFile) // 参数为开始地址，重名参数优先
     string          scenaFileName;
     if (exists(miscs.placeTable))
     {
-        FSeek(miscs.placeTable.place[ReadUShort(0x14 + addrScenaFile)].addrPlaceNameReal);
+        FSeek(startof(miscs.placeTable.place[ReadUShort(0x14 + addrScenaFile)]));
         string      scenaName;
     }
     else if (exists(placeTable))

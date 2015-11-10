@@ -4,33 +4,34 @@
 // File:
 // Author: acgngca
 // Revision:
-// Purpose:
+// Purpose: to parse fc/sc/3rd/zero/ao t_town
 //--------------------------------------
+#include "010_def.bt.h"
 
-#include "ED6_common.bt.h"
+#ifndef placeTable
+#define placeTable townTable
+#endif
 
 typedef struct
 {
-    local int       i = 0;
-    ushort          TOTAL <hidden=true>;
-    ushort          addr[TOTAL] <hidden=true>;
+    local UINT      addrFileBase = FTell();
+
+    local int       i;
+    ushort          TOTAL;
+    ushort          addr[TOTAL];
     for (i = 0; i < TOTAL; i++)
     {
-        FSeek(addr[i] + addrT_town);
+        FSeek(addr[i] + addrFileBase);
         String   place;
     }
 } T_town <read=readT_town>;
 
-string readT_town(T_town &a)
+wstring readT_town(T_town &a)
 {
-    return  "地点列表";
+    return  L"鍦扮偣鍒楄〃";
 }
 
-if (!IsProcess())
+if (!IsProcess() && FTell() == 0)
 {
-    local uint addrT_town = 0;
+    T_town  townTable <open=true>;
 }
-
-//#include "zero_ao_t_town.bt"
-FSeek(addrT_town);
-T_town      placeTable;

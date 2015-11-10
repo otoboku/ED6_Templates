@@ -102,6 +102,8 @@ T_name          characterTable;
 //T_record      recordTable;
 
 #include "zero_ao_t_town.bt"
+FSeek(addrT_town);
+T_town          townTable;
 
 //local uint MasterQuartzCount = 0x16;
 #include "ao_t_mstqrt.bt"

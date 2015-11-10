@@ -8,17 +8,18 @@
 //--------------------------------------
 #define ED6_3RD
 #include "ED6_common.bt.h"
+
 typedef struct {} EMPTY;
+struct STRUCT1;
+struct STRUCT2;
 typedef struct
 {
     int a;
     int b;
-} STRUCT1 <read=readSTRUCT1>;
-
-wstring readSTRUCT1(STRUCT1 &a)
-{
-    return StringToWString("中文", CHARSET_UTF8);
-}
+    STRUCT2 s2;
+    Printf("sizeof(STRUCT1): %d\n", sizeof(this));
+    FSeek(startof(this) + sizeof(this));
+} STRUCT1 <size=4>;
 
 typedef struct
 {
@@ -41,7 +42,8 @@ string readENUM1(ENUM1 &a)
 EMPTY emt1;
 EMPTY emt2;
 
-STRUCT1 s1 <name=readSTRUCT1>;
+STRUCT1 s1;
+STRUCT1 s1;
 STRUCT2 s2;
 
 ENUM1 e[4];
@@ -61,6 +63,8 @@ FileIndex file1[4];
 FileIndex file2[4];
 RESISTANCE resist1[4];
 RESISTANCE resist2[4];
+
+EQUIP       Equip[4];
 /*
 if (1)
 {
@@ -77,4 +81,5 @@ local int i;*/
 * 小结构慎用size＝,全部展开非常慢
 * <hidden=> 不支持#define
 * FSeekHeap() 失败后 FTell() = 0
+* sizeof(this) only works when size= defined
 */

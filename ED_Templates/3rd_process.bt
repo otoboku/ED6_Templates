@@ -22,6 +22,7 @@
 #include "3rd_t_quartz.bt"
 #include "3rd_t_se.bt"
 #include "3rd_t_dropit.bt"
+#include "zero_ao_t_town.bt"
 
 // global control hide
 typedef UINT32      PTR32_HIDE  <format=hex, fgcolor=cPurple, hidden=true>;
@@ -152,6 +153,9 @@ if (FSeekHeap(addrTextTable) != -1)
 
     FSeekHeap(addrT_dropit);
     T_dropit        dropItemTable;
+
+    FSeekHeap(addrT_town);
+    T_town          townTable;
 }
 
 if (FSeekHeap(addrDirEntryCountTable) != -1 && FSeekHeap(addrDirTable) != -1)

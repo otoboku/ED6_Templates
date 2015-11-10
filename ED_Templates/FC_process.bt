@@ -21,6 +21,7 @@
 #include "fc_t_name.bt"
 #include "fc_t_btset.bt"
 #include "fc_t_sltget.bt"
+#include "zero_ao_t_town.bt"
 
 // global control hide
 typedef UINT32      PTR32_HIDE  <format=hex, fgcolor=cPurple, hidden=true>;
@@ -143,14 +144,31 @@ else if (g_GameVersion == ed61steam150820)
     FSeekHeap(0x57FB44);    PTR32_HIDE   addrT_se       ;
     FSeekHeap(0x57F7F4);    PTR32_HIDE   addrT_world    ;
 }
-else if (g_GameVersion == ed61steam)
+else if (g_GameVersion == ed61gog151029)
 {
-    addrFind = FindFirst("83 C4 10 89 3C B5,h", true, false, FINDMETHOD_NORMAL, 0, 1, ProcessHeapToLocalAddress(0x401000), 0x200000);
-    if (addrFind > 0)
-    {
-        addrDirTable            = ReadUInt(addrFind + 3 + 7 + 3);
-        addrDirEntryCountTable  = ReadUInt(addrFind + 3 + 3);
-    }
+    FSeekHeap(0x58BDE4);    PTR32_HIDE   addrT_name     ;   // 0x20000
+    FSeekHeap(0x58BDDC);    PTR32_HIDE   addrT_item     ;   // 0x20001
+    FSeekHeap(0x58BDD0);    PTR32_HIDE   addrT_item2    ;   // 0x2000E
+    FSeekHeap(0x58BACC);    PTR32_HIDE   addrT_magic    ;   // 0x20002
+    FSeekHeap(0x58BDD4);    PTR32_HIDE   addrT_btlset   ;   // 0x20004
+    FSeekHeap(0x58C030);    PTR32_HIDE   addrT_face     ;   // 0x20005
+    FSeekHeap(0x58C254);    PTR32_HIDE   addrT_town     ;   // 0x20006
+    FSeekHeap(0x58BDE0);    PTR32_HIDE   addrT_quest    ;   // 0x20007
+    FSeekHeap(0x58C038);    PTR32_HIDE   addrT_exp      ;   // 0x2000D
+    FSeekHeap(0x58C368);    PTR32_HIDE   addrT_status   ;   // 0x20008
+    FSeekHeap(0x58C048);    PTR32_HIDE   addrT_orb      ;   // 0x20010
+    FSeekHeap(0x58BE0C);    PTR32_HIDE   addrT_magget   ;   // 0x20009
+    FSeekHeap(0x58C044);    PTR32_HIDE   addrT_sltget   ;   // 0x2000A
+    FSeekHeap(0x58BAC0);    PTR32_HIDE   addrT_quartz   ;   // 0x2000F
+    FSeekHeap(0x58C02C);    PTR32_HIDE   addrT_cook2    ;   // 0x20011
+    FSeekHeap(0x58C040);    PTR32_HIDE   addrT_cook     ;   // 0x20012
+    FSeekHeap(0x58C034);    PTR32_HIDE   addrT_memo     ;   // 0x20013
+    FSeekHeap(0x58BDE8);    PTR32_HIDE   addrT_bgmtbl   ;   // 0x20014
+    FSeekHeap(0x58C04C);    PTR32_HIDE   addrT_magqrt   ;   // 0x20015
+    FSeekHeap(0x58C250);    PTR32_HIDE   addrT_crfget   ;   // 0x2000B
+    FSeekHeap(0x58BAC8);    PTR32_HIDE   addrT_book00   ;   // 0x20016
+    FSeekHeap(0x58BE00);    PTR32_HIDE   addrT_se       ;   // 0x20003
+    FSeekHeap(0x58BAB0);    PTR32_HIDE   addrT_world    ;   // 0x20020
 }
 
 
@@ -182,8 +200,20 @@ else if (g_GameVersion == ed61steam150820)
     addrTeam                = 0x12DE9A8;
     addrDifficulty          = 0x12E522D;
 }
-else if (g_GameVersion == ed61steam)
+
+if ((g_GameVersion & ed61steam) == ed61steam)
 {
+    // find addrDirTable
+    {
+        // common for jp ed6123 all and steam all
+        addrFind = FindFirst("83 C4 10 89 3C B5,h", true, false, FINDMETHOD_NORMAL, 0, 1, ProcessHeapToLocalAddress(0x401000), 0x200000);
+        if (addrFind > 0)
+        {
+            addrDirTable            = ReadUInt(addrFind + 3 + 7 + 3);
+            addrDirEntryCountTable  = ReadUInt(addrFind + 3 + 3);
+        }
+    }
+
     // find addrCBattle
     while (1)
     {
@@ -295,6 +325,9 @@ if (FSeekHeap(addrTextTable) != -1)
 
     FSeekHeap(addrT_se);
     T_se            seTable;
+
+    FSeekHeap(addrT_town);
+    T_town          townTable;
 }
 
 if (FSeekHeap(addrDirEntryCountTable) != -1 && FSeekHeap(addrDirTable) != -1)
