@@ -2,7 +2,7 @@
 #define _ed61_common_bt_h_
 
 local const UINT        CHR_BATTLE_INF_SIZE     = 0x23C8;
-local const UINT        BATTLE_INF2_SIZE        = 0x208;
+local const UINT        CHR_BATTLE_INF2_SIZE    = 0x208;
 
 typedef struct
 {

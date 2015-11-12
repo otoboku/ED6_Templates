@@ -88,7 +88,7 @@ local uint addrT_friend = ProcessHeapToLocalAddress(addrMemT_friend);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // table
-//////////////////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include "t_magic.bt"
 FSeek(addrT_magic);
 T_magic         magicTable;
@@ -107,14 +107,14 @@ T_town          townTable;
 
 //local uint MasterQuartzCount = 0x16;
 #include "ao_t_mstqrt.bt"
-//FSeek(addrT_mstqrt);
-//T_mstqrt         masterQuartzTable;    
+FSeek(addrT_mstqrt);
+T_mstqrt        masterQuartzTable;
 
 #include "ao_t_quest.bt"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // scena
-//////////////////////////////////////////////////////////////////////////////////////////////////////// 
+////////////////////////////////////////////////////////////////////////////////////////////////////////
     //FSeek(ProcessHeapToLocalAddress(addrCGLOBAL) + 0x384EC + 0x7D4);  // 0x38EA8
     FSeek(addrCScript + 0x7D4);
     uint addrMemScenaFile[6] <format=hex, hidden=true>;
@@ -167,7 +167,7 @@ T_town          townTable;
             ScenaFile   scenaFile5(addrScenaFile[5]);
         }
 
-        FSeek(addrScenaFile[0]);    // =? addrBase + 0xC3880 
+        FSeek(addrScenaFile[0]);    // =? addrBase + 0xC3880
         ScenaFile   scenaFile(addrScenaFile[0]);
 
     }
@@ -205,7 +205,7 @@ typedef struct
     ushort              ATActTime;  // AT条动多少次，初始为0; AiTime1F
     FileIndex           SYFileIndex <format=hex>;
     FileIndex           MSFileIndex <format=hex>;
-    FileIndex           ASFileIndex <format=hex>;  
+    FileIndex           ASFileIndex <format=hex>;
         DUMMY_STRUCT(1);                                    // 0x1C
         BYTE                    TeamRushAddition;           // 0x1D
         USHORT                  MasterQuartzUsedFlag;       // 0x1E
@@ -256,18 +256,18 @@ typedef struct
     ushort              DropIndex1 <hidden=true>;                 // 掉落物 物品代码
     ushort              DropIndex2 <hidden=true>;
     ubyte               DropProbability1 <hidden=true>;           // 掉落概率
-    ubyte               DropProbability2 <hidden=true>;    
-    ubyte               Sex <hidden=true>; 
-    ubyte               DisplayHighLevelArtsAttResistance <hidden=true>;      
+    ubyte               DropProbability2 <hidden=true>;
+    ubyte               Sex <hidden=true>;
+    ubyte               DisplayHighLevelArtsAttResistance <hidden=true>;
     // 是否开启时空幻有效率显示，0/8 不开启 1/9 开启，应该是标志位，可能含有更多信息
     ushort              Equip[5];                   // 装备
-    ushort              Orb[7];                     // 回路   7个 
+    ushort              Orb[7];                     // 回路   7个
 
     ED7_AI_INFO         NormalAttack;
     ED7_AI_INFO         Arts[80];
     ED7_AI_INFO         Craft[15];
     ED7_AI_INFO         SCraft[5];
-    ED7_AI_INFO         SupportCraft[3]; 
+    ED7_AI_INFO         SupportCraft[3];
     CraftLastUsed_INFO  CraftLastUsed;
     FleeParameter       fleeParameter;
     // 3768 + addrStart
@@ -319,7 +319,7 @@ string readMSFileIndex(ED7_CHARACTER_BATTLE_INF &a)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CActor
-////////////////////////////////////////////////////////////////////////////////////////////////////////    
+////////////////////////////////////////////////////////////////////////////////////////////////////////
 typedef struct
 {
     FSeek(addrCActor + 0x94);
@@ -336,16 +336,16 @@ SetForeColor(cBlue);
     ushort          Team[8];
     ushort          TeamB[8];
 SetForeColor(cNone);
-    
+
     //FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x384EC) + 0x2EC));
     STATUS          Status[12];
     // 0x79438
     EQUIP           Equip[12];
-    // 
+    //
     ARTS            Arts[12];
-    // 
+    //
     CRAFT           Craft[12];
-    // 
+    //
     SCRAFT          SCraft[12];
     // 0x79D98
     ORBMENT         Orbment[12] <optimize=true>;
@@ -383,7 +383,7 @@ SetForeColor(cBlue);
     ushort          SBreak[12];     // S爆发技设定
 
     FSeek(addrCActor + 0x61A0);
-    ubyte           Feelings[0x10]; 
+    ubyte           Feelings[0x10];
 // 64 琪雅；65 艾莉；66 缇欧；67 兰迪；68 诺艾尔；69 瓦吉；6A 莉夏；6B 达德利警官；6C 伊莉娅小姐；6D 塞茜尔姐姐；6E 芙兰；6F 修利
 
     FSeek(addrBase + 0xA6FA5);
@@ -460,7 +460,7 @@ string readBattleButton(BattleButton &a)
 };
 
 typedef struct
-{   
+{
     local int i = 0;
     FSkip(0x28);
     for (i = 0; i < 9; i++)
@@ -480,7 +480,7 @@ typedef struct  //0x78
     byte dummy3[0x2];
     //byte SoldierNo;
     byte RNo;       //0x71
-    byte dummy4;    
+    byte dummy4;
     byte Pri;   //0x73 pri
     byte IsSBreaking;
     byte dummy5[3];
@@ -495,11 +495,11 @@ string ReadED6_AT(ED6_AT &ed6_at)
     else
     {
         SPrintf(strTemp, "%02d %02d at%02d %02x", ReadUShort(ProcessHeapToLocalAddress(ed6_at.addrSoldier)), ed6_at.sequence, ed6_at.icoAT, ed6_at.par);
-        //SPrintf(strTemp, "%d", (ed6_at.addrSoldier-0x60EF38)/CHR_BATTLE_INF_SIZE);    
+        //SPrintf(strTemp, "%d", (ed6_at.addrSoldier-0x60EF38)/CHR_BATTLE_INF_SIZE);
     }
     //SPrintf(strTemp, "%08x %02d %03d", ed6_at.addrSoldier, ed6_at.sequence, ed6_at.at);
     return strTemp;
-    
+
 }
 
 if (addrMemCBattle != 0)
@@ -507,7 +507,7 @@ if (addrMemCBattle != 0)
     local uint addrBattleStart = ProcessHeapToLocalAddress(addrMemCBattle);
     local uint addrCBattle = addrBattleStart;
     FSeek(addrBattleStart);
-    
+
         // 战斗部分
         if (addrBattleStart != 0)
         {
@@ -520,7 +520,7 @@ if (addrMemCBattle != 0)
             for (j = 0; j == ReadUShort(FTell()); j++)
             ////for (j = 0; j < 23; j++)
             {
-                if (ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 16) == 0 && 
+                if (ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 16) == 0 &&
                     ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 20) == 0 &&
                     ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 24) == 0 )
                     ED7_CHARACTER_BATTLE_INF    ED7_character_battle_inf <hidden=true>;//
@@ -536,7 +536,7 @@ if (addrMemCBattle != 0)
         FSeek(addrBattleStart + 0xC36D8);
         byte        BattleStartCondition;   // 战斗开场状况 0 普通, 1 被偷袭, 02 先制, 04 奇袭, 可以锁定..
 
-        FSeek(addrBattleStart + 0xC3104);       
+        FSeek(addrBattleStart + 0xC3104);
         BattleButtonGroup   battleButton;
 
 local uint addrCBattleATBar = addrCBattle + 0x103148;

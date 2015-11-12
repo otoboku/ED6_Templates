@@ -2,7 +2,7 @@
 #define _ed63_common_bt_h_
 
 local const UINT        CHR_BATTLE_INF_SIZE     = 0x2490;
-local const UINT        BATTLE_INF2_SIZE        = 0x2D8;
+local const UINT        CHR_BATTLE_INF2_SIZE    = 0x2D8;
 
 typedef struct
 {
@@ -14,7 +14,7 @@ typedef struct
     FSkip(4);
     ushort              CharacterIndex;
     FSkip(2);
-    ushort              ATActTime;  // AT条动多少次，初始为0
+    USHORT              ATShiftUpCount;             // AT条动多少次，初始为0
     FileIndex           SYFileIndex;                // 0x10
     FileIndex           MSFileIndex;                // 0x14
     FileIndex           ASFileIndex;                // 0x18

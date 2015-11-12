@@ -271,7 +271,45 @@ int DUMMY_STRUCT(int64 size)
     return FSkip(size);
 }*/
 
+int WStrWidth(const wstring wstr)
+{
+    wchar_t     c;
+    int         i = 0;
+    int         width = 0;
+    while(1)
+    {
+        c = wstr[i++];
+        if (c == 0)
+        {
+            break;
+        }
+        else if (c < 0x80u)
+        {
+            width += 1;
+        }
+        else
+        {
+            width += 2;
+        }
+    }
+    return width;
+}
 
+char[] GenerateStringByFill(char c, int n)
+{
+    if (n <= 0) return "";
+    char        s[n];
+    Memset(s, c, n);
+    return      s;
+}
+
+wchar_t[] GenerateWStringByFill(wchar_t c, int n)
+{
+    if (n <= 0) return L"";
+    wchar_t     s[n];
+    WMemset(s, c, n);
+    return      s;
+}
 /*******************************************************************************
     file offset to ... struct
 *******************************************************************************/

@@ -6,51 +6,70 @@
 // Revision:
 // Purpose:
 //--------------------------------------
+#include "010_def.bt.h"
 
-#include "ED6_common.bt.h"
-
-// ºËĞÄ»ØÂ·¶¨Òå ²¿·Ö
+// æ ¸å¿ƒå›è·¯å®šä¹‰ éƒ¨åˆ†
 //-----------------------------------------------------------------------------------------------------------
-string MasterQuartzIndex2Name(ulong index)
+wstring MasterQuartzIndex2Name(ulong index)
 {
-    local string  all = "Á¦Á¿¶ÜÅÆÑı¾«Àû×¦°×½ğ»ÃÏóÕ½¸«·¨ÔòÓğÒíÉñÓÓÍõÈ¨÷ÈÓ°ÊØ»¤ÎŞÏŞĞ¡³ó×ï¶ñ²İÌêÎÆÕÂÁéÃ¨ÆïÊ¿ÏÍÕß²İÌê";
-    if (index >= MasterQuartzCount)
-        return "nul \t";
-    //return SubStr(all, index*4, 4);
-    string s;
-    SPrintf(s, "0x%X %s", 0xDC+index, SubStr(all, index*4, 4));
-    return s;
+    local wstring name;
+    switch (index)
+    {
+        case 0:     name = L"åŠ›é‡ ãƒ•ã‚©ãƒ¼ã‚¹"     ;   break;
+        case 1:     name = L"ç›¾ç‰Œ ã‚·ãƒ¼ãƒ«ãƒ‰"     ;   break;
+        case 2:     name = L"å¦–ç²¾ ãƒ”ã‚¯ã‚·ã‚£"     ;   break;
+        case 3:     name = L"åˆ©çˆª ã‚¯ãƒ­ã‚¦"       ;   break;
+        case 4:     name = L"ç™½é‡‘ ãƒ—ãƒ©ãƒãƒŠ"     ;   break;
+        case 5:     name = L"å¹»è±¡ ãƒŸãƒ©ãƒ¼ã‚¸ãƒ¥"   ;   break;
+        case 6:     name = L"æˆ˜æ–§ ã‚¢ãƒƒã‚¯ã‚¹"     ;   break;
+        case 7:     name = L"æ³•åˆ™ ã‚«ãƒãƒ³"       ;   break;
+        case 8:     name = L"ç¾½ç¿¼ ã‚¦ã‚£ãƒ³ã‚°"     ;   break;
+        case 9:     name = L"ç¥ä½‘ ã‚¤ãƒ¼ã‚¸ã‚¹"     ;   break;
+        case 10:    name = L"ç‹æƒ ã‚»ãƒ—ã‚¿ãƒ¼"     ;   break;
+        case 11:    name = L"é­…å½± ãƒ•ã‚¡ãƒ³ãƒˆãƒ "   ;   break;
+        case 12:    name = L"å®ˆæŠ¤ ã‚­ãƒ¼ãƒ‘ãƒ¼"     ;   break;
+        case 13:    name = L"æ— é™ ãƒ¡ãƒ“ã‚¦ã‚¹"     ;   break;
+        case 14:    name = L"å°ä¸‘ ã‚¸ãƒ£ã‚°ãƒ©ãƒ¼"   ;   break;
+        case 15:    name = L"ç½ªæ¶ ã‚¯ãƒªãƒŸãƒŠãƒ«"   ;   break;
+        case 16:    name = L"è‰å‰ƒ ã‚¯ã‚µãƒŠã‚®"     ;   break;
+        case 17:    name = L"çº¹ç«  ã‚¨ãƒ³ãƒ–ãƒ¬ãƒ "   ;   break;
+        case 18:    name = L"çµçŒ« ã‚«ãƒƒãƒ„ã‚§"     ;   break;
+        case 19:    name = L"éª‘å£« ã‚·ãƒ¥ãƒãƒªã‚¨"   ;   break;
+        case 20:    name = L"è´¤è€… ãƒã‚®ã‚¦ã‚¹"     ;   break;
+        case 21:    name = L"è‰å‰ƒ ã‚¯ã‚µãƒŠã‚®"     ;   break;
+        default:    name = L"nul"               ;
+    }
+    string  str;
+    SPrintf(str, "0x%X ", 0xDC + index);
+    //SPrintf(str, "0x%0*X ", Random(4) + 2, 0xDC + index);
+    return  StringToWString(str) + name;
 }
 
 typedef struct _MasterQuartzLv
 {
-    //×¢³ıHP,SPDÍâ, ÆäËü*10
+    //æ³¨é™¤HP,SPDå¤–, å…¶å®ƒ*10
     ushort  HP_up;
-    ubyte   EP_up;  
+    ubyte   EP_up;
     ubyte   STR_up;
     ubyte   DEF_up;
     ubyte   ATS_up;
     ubyte   ADF_up;
     ubyte   SPD_up;
-    ubyte   Effect1ST;      // »ØºÏÊı
-    ubyte   Effect1Rate;    // Ôö¼Ó±ÈÂÊ
-    ubyte   Effect2ST;      // »ØºÏÊı
-    ubyte   Effect2Rate;    // Ôö¼Ó±ÈÂÊ
-    ushort  MasterArt;      // ºËĞÄÄ§·¨
-    ubyte   IntroIndex[6];  // 6ĞĞÎÄ×ÖÏÔÊ¾Ë÷Òı, ÓëÏÂÃæMMintroÊı×éË÷Òı¶ÔÓ¦
+    ubyte   Effect1ST;      // å›åˆæ•°
+    ubyte   Effect1Rate;    // å¢åŠ æ¯”ç‡
+    ubyte   Effect2ST;      // å›åˆæ•°
+    ubyte   Effect2Rate;    // å¢åŠ æ¯”ç‡
+    ushort  MasterArt;      // æ ¸å¿ƒé­”æ³•
+    ubyte   IntroIndex[6];  // 6è¡Œæ–‡å­—æ˜¾ç¤ºç´¢å¼•, ä¸ä¸‹é¢MMintroæ•°ç»„ç´¢å¼•å¯¹åº”
 
-    local uint  addrTemp = FTell();
-
-    local   uint i, addrIntroReal[6];
-    for (i=0; i<6; i++)
+    local UINT i;
+    for (i = 0; i < 6; ++i)
     {
-        addrIntroReal[i] = parentof(parentof(this)).addrIntro[IntroIndex[i]] + addrT_mstqrt;
-        FSeek(addrIntroReal[i]);
+        FSeek(addrIntro[IntroIndex[i]] + addrFileBase);
         String Intro;
     }
-    FSeek(addrTemp);
-
-} MasterQuartzLv <read=readMasterQuartzLv,write=writeMasterQuartzLv>;
+    FSeek(startof(IntroIndex) + sizeof(IntroIndex));
+} MasterQuartzLv <read=readMasterQuartzLv, write=writeMasterQuartzLv>;
 
 string readMasterQuartzLv(MasterQuartzLv &a)
 {
@@ -62,50 +81,52 @@ string readMasterQuartzLv(MasterQuartzLv &a)
 void writeMasterQuartzLv(MasterQuartzLv &a, string s) {;}
 
 
-typedef struct(int parMasterQuartz)// _MasterQuartz
+typedef struct(int parMasterQuartz)
 {
-    local uint index;
-    for (index=0; index<5; index++)
+    local ULONG Index;
+    for (Index = 0; Index < 5; ++Index)
     {
-        MasterQuartzLv masterQuartzLv;
+        MasterQuartzLv  Lv;
     }
 
-    index = parMasterQuartz;   
-} MasterQuartz <read=readMasterQuartz,write=writeMasterQuartz>;
+    Index = parMasterQuartz;
+} MasterQuartz <read=readMasterQuartz, write=writeMasterQuartz>;
 
-string readMasterQuartz(MasterQuartz &a)
+wstring readMasterQuartz(MasterQuartz &a)
 {
-    //return MasterQuartzIndex2Name((startof(a) - addrT_mstqrt)/sizeof(MasterQuartz));
-    return MasterQuartzIndex2Name(a.index);
+    wstring wstr = MasterQuartzIndex2Name(a.Index);
+    return  wstr + GenerateWStringByFill(L' ', 24 - WStrWidth(wstr)) + StringToWString(a.Lv[4].Intro[0].str, GetFileCharSet());
 }
 
 void writeMasterQuartz(MasterQuartz &a, string s) {;}
 
 typedef struct
 {
-    FSeek(addrT_mstqrt + 0x64*MasterQuartzCount);
-    ushort addrIntro[0xFF] <hidden=true>;
+    local ULONG     addrFileBase = FTell();
+    local ULONG     i;
 
-    FSeek(addrT_mstqrt);
-    local int i;
-    for (i=0; i<MasterQuartzCount; i++)
+    FSeek(addrFileBase + 0x64 * MASTER_QUARTZ_COUNT);
+    ushort addrIntro[MASTER_QUARTZ_COUNT * 5 * 6] <hidden=true>;
+
+    FSeek(addrFileBase);
+    for (i = 0; i < MASTER_QUARTZ_COUNT; ++i)
     {
         MasterQuartz masterQuartz(i);
     }
 } T_mstqrt <read=readT_mstqrt>;
 
-string readT_mstqrt(T_mstqrt &a)
+wstring readT_mstqrt(T_mstqrt &a)
 {
-    return  "ºËĞÄ»ØÂ·";
+    return  L"æ ¸å¿ƒå›è·¯";
 }
 
-if (!IsProcess())
+if (!exists(MASTER_QUARTZ_COUNT))
 {
-    local uint addrT_mstqrt = 0;
+    local ULONG MASTER_QUARTZ_COUNT = 0x16;
 }
 
-local uint MasterQuartzCount = 0x16;
-//#include "ao_t_mstqrt.bt"
-FSeek(addrT_mstqrt);
-T_mstqrt         masterQuartzTable;
+if (!IsProcess() && FTell() == 0)
+{
+    T_mstqrt    masterQuartzTable <open=true>;
+}
 

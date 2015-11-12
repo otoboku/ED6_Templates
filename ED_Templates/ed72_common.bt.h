@@ -1,14 +1,11 @@
 #ifndef _ed72_common_bt_h_
 #define _ed72_common_bt_h_
 
-local const UINT        CHR_BATTLE_INF_SIZE     = 0x243C;
-local const UINT        BATTLE_INF2_SIZE        = 0x320;
+local const UINT        CHR_BATTLE_INF_SIZE     = 0x2424;
+local const UINT        CHR_BATTLE_INF2_SIZE    = 0x31C;
 
 typedef struct
 {
-    local int           addrStart = FTell();
-    local int           soldierIndex = j;
-    // 0
     ushort              SoldierNo;                  // 我方0-7，敌方8-15，支援16-19，待分身20-21
     ubyte               unknownFlags1 <format=hex, hidden=true>;
     ubyte               Flags <format=hex>;                      // 10 敌方 40 己方 ...
@@ -17,7 +14,7 @@ typedef struct
     FSkip(4);   // 复制上面四个参数？？？
     ushort              CharacterIndex;
     FSkip(2);   // FF 00 常量？
-    ushort              ATActTime;  // AT条动多少次，初始为0; AiTime1F
+    USHORT              ATShiftCount;               // AT条动多少次，初始为0
     FileIndex           SYFileIndex <format=hex>;
     FileIndex           MSFileIndex <format=hex>;
     FileIndex           ASFileIndex <format=hex>;
@@ -85,7 +82,7 @@ typedef struct
     ED7_AI_INFO         SupportCraft[3];
     CraftLastUsed_INFO  CraftLastUsed;
     FleeParameter       fleeParameter;
-    // 3768 + addrStart
+    // 3768 + startof(this)
     // 16条战技定义共512字节，（说明256 名字32）共288x
     //DUMMY_STRUCT(0x50);
     //DUMMY_STRUCT(0x38);
@@ -104,22 +101,22 @@ typedef struct
     RESISTANCE          Resistance;
 
 
-    FSeek(addrBattleStart + 0x660 + 0x31C*soldierIndex + 0xE0);
+    FSeek(addrBattleStart + 0x660 + 0x31C*SoldierNo + 0xE0);
     //FSeek(ProcessHeapToLocalAddress(ReadUInt(addrHP-8)));
     string              CharacterName;
     // 9112
-    FSeek(addrStart + 0x2380);
+    FSeek(startof(this) + 0x2380);
     string              CharacterIntro;
 
-    FSeek(addrStart + 0x2408);
+    FSeek(startof(this) + 0x2408);
     ULONG                       SummonCount;            // 0x2408
 
-    FSeek(addrStart + 0x2418);
+    FSeek(startof(this) + 0x2418);
     ubyte               DUMMY_STRUCT_12[8] <hidden=true>;
 
-    FSeek(addrCBattle + 0x5F00 * soldierIndex + 0x3A800);
+    FSeek(addrCBattle + 0x5F00 * SoldierNo + 0x3A800);
     USHORT tempAS;
-    FSeek(addrStart + CHR_BATTLE_INF_SIZE);
+    FSeek(startof(this) + CHR_BATTLE_INF_SIZE);
     // 9112 + 164 = 9276 243C
 
 } ED7_CHARACTER_BATTLE_INF <read = readMSFileIndex>;
