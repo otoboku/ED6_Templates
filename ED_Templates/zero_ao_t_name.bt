@@ -37,9 +37,7 @@ typedef struct(int parCHARACTER)    // 0x14 bytes
 
 string readCharacterName(CHARACTER &a)
 {
-    string temp;
-    SPrintf(temp,"ms%08X  ",a.MSFileIndex);
-    return StrDel(temp,2,3) + a.CharacterName;
+    return readFileIndex(a.MSFileIndex) + ' ' + a.CharacterName;
 }
 
 void writeCharacterName(CHARACTER &a, string s)

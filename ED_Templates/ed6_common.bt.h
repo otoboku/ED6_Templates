@@ -111,7 +111,7 @@ string readTypeFlag(TypeFlag &a)
 #ifdef ED6_ALL
     typedef struct  //DAT DIR文件索引
     {
-        int file <format=hex>;
+        HEX32   file;
         FSkip(-sizeof(file));
         ushort  Index;
         ushort  DatNo <format=hex>;
@@ -119,7 +119,7 @@ string readTypeFlag(TypeFlag &a)
         //local string    _str_;
         //SPrintf(_str_, "DT%02X  %04d", DatNo, Index);
         //SPrintf(_str_, "%#x", file);
-    } FileIndex <read=readFileIndex, write=writeFileIndex, open=suppress>;
+    } FileIndex <read=readFileIndex, write=writeFileIndex, open=suppress, optimize=true>;
 
     string readFileIndex(FileIndex &a)
     {
@@ -133,6 +133,57 @@ string readTypeFlag(TypeFlag &a)
         SScanf(s, "%x", a.file);
     }
 #else
+    typedef struct
+    {
+        HEX32   file;
+        FSkip(-sizeof(file));
+        HEX32   Index    :20;
+        //HEX32   FileType :12;
+        enum <HEX32>
+        {
+            ms          = 0x300,
+            as          = 0x301,
+            bs          = 0x302,
+            sy          = 0x310,
+            chr_ch      = 0x7,
+            apl_ch      = 0x8,
+            monster_ch  = 0x9,
+        } FileType :12 <format=hex>;
+    //  300:MS  data\battle\dat\ms12345.dat
+    //  301:AS  data\battle\dat\as12345.dat
+    //  302:BS  data\battle\dat\bs12345.dat
+    //  310:SY  data\battle\symbol\sy12345.itp (SymbolTexture AT条头像)
+    //  007:CH  data\chr\ch12345.itc    //人物素材，如在队时 站立移动时的形象
+    //  008:CH  data\apl\ch12345.itc
+    //  009:CH  data\monster\ch12345.itc//怪物素材
+    } FileIndex <read=readFileIndex, write=writeFileIndex, open=suppress, optimize=true>;
+    local uint MS = 0;
+
+    string readFileIndex(FileIndex &a)
+    {
+        local string    format, str;
+        switch (a.FileType)
+        {
+            case 0x300: format = "ms%05x.dat";          break;
+            case 0x301: format = "as%05x.dat";          break;
+            case 0x302: format = "bs%05x.dat";          break;
+            case 0x310: format = "sy%05x.itp";          break;
+            case 0x007: format = "chr\\ch%05x.itc";     break;
+            case 0x008: format = "apl\\ch%05x.itc";     break;
+            case 0x007: format = "monster\\ch%05x.itc"; break;
+            default:
+                SPrintf(str, "%#x", a.file);
+                return  str;
+        }
+        SPrintf(str, format, a.Index);
+        return  str;
+    }
+
+    void writeFileIndex(FileIndex &a, string s)
+    {
+        //SScanf(s, "%x", a.file);
+    }
+    /*
     typedef int FileIndex <format=hex, read=readFileIndex, write=writeFileIndex>;
 
     string readFileIndex(FileIndex &a)
@@ -145,7 +196,7 @@ string readTypeFlag(TypeFlag &a)
     void writeFileIndex(FileIndex &a, string s)
     {
         SScanf(s, "%x", a);
-    }
+    }*/
 #endif
 #define ReadFileIndex readFileIndex
 
@@ -622,7 +673,6 @@ typedef struct
 #endif
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#ifdef ED6_ALL
 #ifdef ED6_FC
 #include "ed61_common.bt.h"
 #endif
@@ -633,6 +683,14 @@ typedef struct
 
 #ifdef ED6_3RD
 #include "ed63_common.bt.h"
+#endif
+
+#ifdef ED_ZERO
+#include "ed71_common.bt.h"
+#endif
+
+#ifdef ED_AO
+#include "ed72_common.bt.h"
 #endif
 
 /*******************************************************************************
@@ -646,6 +704,7 @@ string readCHR_BATTLE_INF(CHR_BATTLE_INF &a)
 }
 void writeCHR_BATTLE_INF(CHR_BATTLE_INF &a, string  s) {};
 
+#ifdef AT_BAR_ENTRY_SIZE
 /*******************************************************************************
     CBattleATBar common
 *******************************************************************************/
@@ -671,7 +730,9 @@ string readAT_BAR_ENTRY(AT_BAR_ENTRY &entry)
 // CActTurnWindow
 typedef struct
 {
+#ifdef ED6_ALL
     ArrayBytes      LeadingBytes(4);
+#endif
     //AT_BAR_ENTRY    Entry[AT_BAR_ENTRY_COUNT];
     DUMMY_STRUCT(AT_BAR_ENTRY_COUNT * AT_BAR_ENTRY_SIZE);
     PTR32           EntryPointer[AT_BAR_ENTRY_COUNT];
@@ -703,7 +764,6 @@ int sizeCBattleATBar(CBattleATBar &a)
 {
     return 4 + AT_BAR_ENTRY_COUNT * AT_BAR_ENTRY_SIZE + AT_BAR_ENTRY_COUNT * sizeof(PTR32);
 }
-
 #endif
 
 #endif

@@ -18,7 +18,7 @@
     common types
 *******************************************************************************/
 
-// hidden
+// hidden=true
 typedef char        char_h      <open=suppress, hidden=true>;
 typedef byte        byte_h      <open=suppress, hidden=true>;
 typedef CHAR        CHAR_H      <open=suppress, hidden=true>;
@@ -81,7 +81,7 @@ typedef string      string_h    <open=suppress, hidden=true>;
 typedef wstring     wstring_h   <open=suppress, hidden=true>;
 typedef wchar_t     wchar_t_h   <open=suppress, hidden=true>;
 
-
+// open=suppress
 // typedef $1\t\t$1\t\t<open=suppress>;\r\n
 typedef char        char        <open=suppress>;
 typedef byte        byte        <open=suppress>;
@@ -145,8 +145,20 @@ typedef string      string      <open=suppress>;
 typedef wstring     wstring     <open=suppress>;
 typedef wchar_t     wchar_t     <open=suppress>;
 
-typedef UINT32      PTR32       <format=hex, fgcolor=cPurple>;
-typedef UINT64      PTR64       <format=hex, fgcolor=cPurple>;
+// format=hex
+typedef CHAR        HEX8        <format=hex>;
+typedef SHORT       HEX16       <format=hex>;
+typedef INT32       HEX32       <format=hex>;
+typedef INT64       HEX64       <format=hex>;
+
+typedef UCHAR       UHEX8       <format=hex>;
+typedef USHORT      UHEX16      <format=hex>;
+typedef UINT32      UHEX32      <format=hex>;
+typedef UINT64      UHEX64      <format=hex>;
+
+typedef INT32       PTR32       <format=hex, fgcolor=cPurple>;
+typedef INT64       PTR64       <format=hex, fgcolor=cPurple>;
+
 
 /**
 * from wincon.h
@@ -271,11 +283,12 @@ int DUMMY_STRUCT(int64 size)
     return FSkip(size);
 }*/
 
+// not accurate, see wcwidth
 int WStrWidth(const wstring wstr)
 {
-    wchar_t     c;
-    int         i = 0;
-    int         width = 0;
+    local wchar_t   c;
+    local int       i = 0;
+    local int       width = 0;
     while(1)
     {
         c = wstr[i++];
@@ -283,32 +296,51 @@ int WStrWidth(const wstring wstr)
         {
             break;
         }
-        else if (c < 0x80u)
+        else if (c < 0x2000)
         {
-            width += 1;
+            if (c >= 0x20)
+            {
+                width += 1;
+            }
         }
         else
         {
-            width += 2;
+            if (0xFF61 <= c && c <= 0xFF9F)
+            {
+                width += 1;
+            }
+            else
+            {
+                width += 2;
+            }
+
         }
     }
     return width;
 }
 
-char[] GenerateStringByFill(char c, int n)
+char[] StringConstructByFill(char c, int n)
 {
-    if (n <= 0) return "";
-    char        s[n];
+    if (n <= 0)
+    {
+        return "";
+    }
+    local char      s[n+1];
     Memset(s, c, n);
-    return      s;
+    s[n] = 0;
+    return s;
 }
 
-wchar_t[] GenerateWStringByFill(wchar_t c, int n)
+wchar_t[] WStringConstructByFill(wchar_t c, int n)
 {
-    if (n <= 0) return L"";
-    wchar_t     s[n];
+    if (n <= 0)
+    {
+        return L"";
+    }
+    local wchar_t   s[n+1];
     WMemset(s, c, n);
-    return      s;
+    s[n] = 0;
+    return s;
 }
 /*******************************************************************************
     file offset to ... struct

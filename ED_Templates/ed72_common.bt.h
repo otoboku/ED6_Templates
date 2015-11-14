@@ -11,13 +11,14 @@ typedef struct
     ubyte               Flags <format=hex>;                      // 10 敌方 40 己方 ...
     ubyte               DeathFlags <format=hex>;                 // 02 不参与战场胜利判定 04 死后留在战场上
     ubyte               UnderAttackFlags <format=hex>;           // 08 Resist ATDelay 02 不被击退 01 无法移动(移动会卡死)  10 无法被攻击到  20 强制miss
-    FSkip(4);   // 复制上面四个参数？？？
+    FSkip(4);
     ushort              CharacterIndex;
-    FSkip(2);   // FF 00 常量？
-    USHORT              ATShiftCount;               // AT条动多少次，初始为0
-    FileIndex           SYFileIndex <format=hex>;
-    FileIndex           MSFileIndex <format=hex>;
-    FileIndex           ASFileIndex <format=hex>;
+    FSkip(2);
+    USHORT              ATShiftUpCount;             // AT条动多少次，初始为0
+    FileIndex           SYFileIndex;                // 0x10
+    FileIndex           MSFileIndex;                // 0x14
+    FileIndex           ASFileIndex;                // 0x18
+
         DUMMY_STRUCT(1);                                    // 0x1C
         BYTE                    TeamRushAddition;           // 0x1D
         USHORT                  MasterQuartzUsedFlag;       // 0x1E
@@ -30,10 +31,10 @@ typedef struct
 
         USHORT                  PreviousActionType;         // 0x170
         USHORT                  SelectedActionType;         // 0x172
-        USHORT                  Unknown_174;
-        USHORT                  Unknown_176;
-        USHORT                  Unknown_178;
-        USHORT                  Unknown_17A;
+        USHORT_H                Unknown_174;
+        USHORT_H                Unknown_176;
+        USHORT_H                Unknown_178;
+        USHORT_H                Unknown_17A;
         USHORT                  WhoAttackMe;                // 0x17C
         USHORT                  CurrentCraftIndex;          // 0x17E
         USHORT                  LastActionIndex;            // 0x180
@@ -52,26 +53,23 @@ typedef struct
         BYTE                    IsHitJudged[0x10];          // 0x21C
         DUMMY_STRUCT(0x234 - 0x22C);
 
-    local uint          addrHP = FTell();
-    STATUS              StatusBasic;    // normal难度基础值
-    // 568 + 52
-    STATUS              StatusSum;      // 算上难度、装备、回路
-    ushort              MoveSPD <hidden=true>;                // 移动速度，我方人员也从ms文件中读取
-    ushort              MoveAfterAttack ;        // 从ms文件中读取
+    //FSeek(startof(this) + 0x234);
+    STATUS              StatusBasic;                // 0x234
+    STATUS              StatusSum;                  // 0x268
+    ushort              MoveSPD;
+    ushort              MoveAfterAttack;
     CONDITION           Condition[32];
-    ubyte               DUMMY_STRUCT_02[24] <hidden=true>;
-    uint                AT;
-    uint                AT2;    // AiTime08用
-    // 0x544
+    FSkip(24);
+    int                 AT;
+    int                 AT2;
+
     ushort              AIType;
     ushort              EXPGet;                     // 战斗胜利 结算经验前暂存
-    ushort              DropIndex1 <hidden=true>;                 // 掉落物 物品代码
-    ushort              DropIndex2 <hidden=true>;
-    ubyte               DropProbability1 <hidden=true>;           // 掉落概率
-    ubyte               DropProbability2 <hidden=true>;
-    ubyte               Sex <hidden=true>;
+    ushort              DropIndex[2];               // 掉落物 物品代码
+    ubyte               DropProbability[2];         // 掉落概率
+    ubyte               Sex;
     ubyte               DisplayHighLevelArtsAttResistance <hidden=true>;
-    // 是否开启时空幻有效率显示，0/8 不开启 1/9 开启，应该是标志位，可能含有更多信息
+                                                    // 是否开启时空幻有效率显示，0/8 不开启 1/9 开启，应该是标志位，可能含有更多信息
     ushort              Equip[5];                   // 装备
     ushort              Orb[7];                     // 回路   7个
 
@@ -81,52 +79,50 @@ typedef struct
     ED7_AI_INFO         SCraft[5];
     ED7_AI_INFO         SupportCraft[3];
     CraftLastUsed_INFO  CraftLastUsed;
-    FleeParameter       fleeParameter;
-    // 3768 + startof(this)
-    // 16条战技定义共512字节，（说明256 名字32）共288x
-    //DUMMY_STRUCT(0x50);
-    //DUMMY_STRUCT(0x38);
-    local uint          addrCraftDefinition = FTell();
-    local ushort        CRAFT_INFO_SIZE = 28;   // 魔法条长度 碧轨24+4 空轨零轨28+4
-    ED7_CRAFT_DEFINITION_GROUP  CraftDefinition;    // 实际上只能放15个
-    // 4280
-    ////ubyte               DUMMY_STRUCT_06[32] <hidden=true>;
-    ubyte               DUMMY_STRUCT_07[288*16];    // 战技说明
-    //ubyte             DUMMY_STRUCT_08[64];
-    // FSkip(288*15 + 352);
-    // 8952
+    RUNAWAY_INFO        RunawayInfo;
+    CRAFT_INFO_GROUP    CraftDefinition;
+    CRAFT_INTRO         CraftIntro[0x10];
+
+    //FSeek(startof(this) + 0x22EC);
     ubyte               Sepith[7];                  // 掉落耀晶片
-    ubyte               DUMMY_STRUCT_09 <hidden=true>;
+    FSkip(1);
     ushort              ArtsAttResistance[8];       // 七曜属性有效率
-    RESISTANCE          Resistance;
+    RESISTANCE          Resistance;                 // 0x2304
 
 
-    FSeek(addrBattleStart + 0x660 + 0x31C*SoldierNo + 0xE0);
-    //FSeek(ProcessHeapToLocalAddress(ReadUInt(addrHP-8)));
-    string              CharacterName;
-    // 9112
+    FSeek(addrCBattleLocal + 0x660 + CHR_BATTLE_INF2_SIZE * SoldierNo + 0xE0);
+    String              ChrName;
+
     FSeek(startof(this) + 0x2380);
-    string              CharacterIntro;
+    string              ChrIntro;
 
     FSeek(startof(this) + 0x2408);
-    ULONG                       SummonCount;            // 0x2408
+    ULONG               SummonCount;                // 0x2408
 
-    FSeek(startof(this) + 0x2418);
-    ubyte               DUMMY_STRUCT_12[8] <hidden=true>;
-
-    FSeek(addrCBattle + 0x5F00 * SoldierNo + 0x3A800);
+    FSeek(addrCBattleLocal + 0x5F00 * SoldierNo + 0x3A800);
     USHORT tempAS;
+
     FSeek(startof(this) + CHR_BATTLE_INF_SIZE);
-    // 9112 + 164 = 9276 243C
+} ED6_CHARACTER_BATTLE_INF <read=readCHR_BATTLE_INF, write=writeCHR_BATTLE_INF>;
 
-} ED7_CHARACTER_BATTLE_INF <read = readMSFileIndex>;
-
-string readMSFileIndex(ED7_CHARACTER_BATTLE_INF &a)
+typedef struct  // 0x78
 {
-    string  temp;
-    SPrintf(temp,"ms%x",a.MSFileIndex);
-    temp = StrDel(temp,2,3);
-    return  temp + " " + a.CharacterName;
-}
+    DUMMY_STRUCT(0x60);
+    PTR32       MSData;     // 0x60
+    PTR32       addrCBattle;// 0x64
+    INT         IconAT;     // 0x68
+    UHEX8       Flags;      // 0x6C 不含20 空  含04 行动、delay后的([20A]0销毁); 含40 当前行动的(1销毁)
+    UCHAR       Sequence;   // 0x6E
+    DUMMY_STRUCT(2);
+    UCHAR       RNo;        // 0x71
+    DUMMY_STRUCT(1);
+    UCHAR       Pri;        // 0x73 pri
+    UCHAR       IsSBreaking;// 0x74
+    DUMMY_STRUCT(3);
+} AT_BAR_ENTRY <read=readAT_BAR_ENTRY, optimize=true>;
+
+#define AT_BAR_ENTRY_COUNT          0x3C
+#define AT_BAR_ENTRY_SIZE           0x78
+#define AT_BAR_ENTRY_OFFSET_FLAGS   0x6C
 
 #endif

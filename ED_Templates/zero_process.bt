@@ -7,14 +7,15 @@
 // Purpose:方便测试
 // Readme:  可以进行的操作: 修改 物品/魔法战技 包括回路属性值，修改(增加)物品数量，战斗部分各种。
 //          进入战斗后运行模板，战斗部分才会出来。
-//          好多没用的东西被隐藏了； 还有好多东西意义不明，欢迎测试报错 
+//          好多没用的东西被隐藏了； 还有好多东西意义不明，欢迎测试报错
 //
 //--------------------------------------
 #define ED_ZERO     0x08
 #include "ED6_common.bt.h"
+#include "zero_ao_t_name.bt"
 
 // DT
-Assert(IsProcess(), "It's not a process!"); 
+Assert(IsProcess(), "It's not a process!");
 
 // 一些结构
 //-----------------------------------------------------------------------------------------------------------
@@ -77,7 +78,7 @@ string readBattleButton(BattleButton &a)
 };
 
 typedef struct
-{   
+{
     local int i = 0;
     FSkip(0x28);
     for (i = 0; i < 6; i++)
@@ -105,11 +106,11 @@ typedef struct(int parITEM)
         // 垂钓: 23 鱼饵, 24 鱼, 25 钓竿
 
         ushort  ItemIndex;  // 除回路外，物品说明、战斗时的物品名称和说明 靠这个索引, 正常情况下和物品代码相同
-        ubyte   Misc <format=hex>;  
+        ubyte   Misc <format=hex>;
         // 01 战斗中显示(可以使用,对回复料理无效), 02 可以使用, 04 可以丢弃, 08 可以出售
         // 10 目标敌方, 20 目标包括战斗不能的 ,40 80 意义不明
 
-        if (switchType == 0 || switchType == 99) 
+        if (switchType == 0 || switchType == 99)
         {
             local string    TypeName = "无效";
             ubyte   Limit;
@@ -207,7 +208,7 @@ typedef struct(int parITEM)
                 ushort  QuartzIndex <hidden=true>;
                 ushort  QuartzAtt;
                 ushort  QuartzSepithCost[8];
-                ubyte   QuartzElementalValue[8];    
+                ubyte   QuartzElementalValue[8];
             }
             else
             {
@@ -282,7 +283,7 @@ typedef struct(int parITEM)
         iTxt = i, jTxt = j;
         FSeek(ReadUShort(ReadUShort(iTxt*2 + addrT_ittxtRef) + jTxt*2 + addrT_ittxtRef) + addrT_ittxtRef);
         ushort  ItemTxtIndex;
-        ubyte   DUMMY_STRUCT_10[2] <hidden=true>;       
+        ubyte   DUMMY_STRUCT_10[2] <hidden=true>;
         ushort  addrItemName <hidden=true>;     // 物品名 地址
         ushort  addrItemIntro <hidden=true>;    // 物品说明 地址
         local uint  addrItemNameReal = addrItemName + addrT_ittxtRef;
@@ -325,7 +326,7 @@ typedef struct(int parITEM)
             }
             FSeek(ReadUShort(ReadUShort(iTxt*2 + addrT_ittxtRef) + jTxt*2 + addrT_ittxtRef) + addrT_ittxtRef);
             ushort  ItemTxtIndexAlias;
-            ubyte   DUMMY_STRUCT_20[2] <hidden=true>;       
+            ubyte   DUMMY_STRUCT_20[2] <hidden=true>;
             ushort  addrItemNameAlias <hidden=true>;        // 物品名 地址
             ushort  addrItemIntroAlias <hidden=true>;       // 物品说明 地址
             local uint  addrItemNameAliasReal = addrItemNameAlias + addrT_ittxtRef;
@@ -396,7 +397,7 @@ typedef struct
     }
 
     // t_item2._dt 衔接
-    if ((ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef) != 0)  && 
+    if ((ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef) != 0)  &&
         (ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef) != itemIndex))
     {
         itemIndex = ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef);
@@ -411,7 +412,7 @@ typedef struct
     {
         for (j = 0; j < 100; j++)
         {
-            if (((addrRef[i] + j*2) < addrRef[i+1]) && 
+            if (((addrRef[i] + j*2) < addrRef[i+1]) &&
                 (ReadUShort(addrRef[i] + j*2 + addrT_itemRef) != ReadUShort(addrRef[i] + j*2 + 2 + addrT_itemRef)))
                 ////if (((addrRef[i] + j*2) < addrRef[i+1]) && (ReadUShort(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef) == k))
                 ////if ((addrRef[i] + j*2) < addrRef[i+1])
@@ -438,8 +439,8 @@ typedef struct
                 FSeek(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef);    // 跳转
                 ITEM    item(1);
             }
-            else 
-                if (((addrRef[i] + j*2) < (ReadUShort(addrRef[0] + addrT_itemRef) - 2)) && 
+            else
+                if (((addrRef[i] + j*2) < (ReadUShort(addrRef[0] + addrT_itemRef) - 2)) &&
                     (ReadUShort(addrRef[i] + j*2 + addrT_itemRef) != ReadUShort(addrRef[i] + j*2 + 2 + addrT_itemRef)))
                 {
                     FSeek(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef);    // 跳转
@@ -469,7 +470,7 @@ typedef struct
     }
 
     // t_item2._dt 衔接
-    if ((ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef) != 0)  && 
+    if ((ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef) != 0)  &&
         (ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef) != itemIndex))
     {
         itemIndex = ReadUShort(ReadUShort(addrRef[0] + addrT_itemRef) + addrT_itemRef);
@@ -484,7 +485,7 @@ typedef struct
     {
         for (j = 0; j < 100; j++)
         {
-            if (((addrRef[i] + j*2) < addrRef[i+1]) && 
+            if (((addrRef[i] + j*2) < addrRef[i+1]) &&
                 (ReadUShort(addrRef[i] + j*2 + addrT_itemRef) != ReadUShort(addrRef[i] + j*2 + 2 + addrT_itemRef)))
                 ////if (((addrRef[i] + j*2) < addrRef[i+1]) && (ReadUShort(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef) == k))
                 ////if ((addrRef[i] + j*2) < addrRef[i+1])
@@ -511,8 +512,8 @@ typedef struct
                 FSeek(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef);    // 跳转
                 ITEM    item(1);
             }
-            else 
-                if (((addrRef[i] + j*2) < (ReadUShort(addrRef[0] + addrT_itemRef) - 2)) && 
+            else
+                if (((addrRef[i] + j*2) < (ReadUShort(addrRef[0] + addrT_itemRef) - 2)) &&
                     (ReadUShort(addrRef[i] + j*2 + addrT_itemRef) != ReadUShort(addrRef[i] + j*2 + 2 + addrT_itemRef)))
                 {
                     FSeek(ReadUShort(addrRef[i] + j*2 + addrT_itemRef) + addrT_itemRef);    // 跳转
@@ -644,7 +645,7 @@ typedef struct(int parMAGIC)
     if (parMAGIC == 1)
     {
         ushort  AnimationType;
-        ubyte   Target; 
+        ubyte   Target;
         ubyte   SpecialEffect;      // 01 强制命中 02 驱动时无法被打断
         ubyte   Att;                // 属性
         // 空轨FCSC     0无 1地 2水 3火 4风 5空 6幻 0时 // FCSC没有 时空幻有效率，所以无所谓
@@ -780,10 +781,6 @@ string readT_magic(T_magic &a)
     return  "魔法战技定义";
 }
 
-#include "zero_ao_t_name.bt"
-FSeek(addrT_name);
-T_name          characterTable;
-
 // 地点列表
 //-----------------------------------------------------------------------------------------------------------
 typedef struct
@@ -862,107 +859,6 @@ string readT_record(T_record &a)
     return  "成就列表";
 }
 
-// 战斗 部分
-//-----------------------------------------------------------------------------------------------------------
-
-typedef struct
-{
-    local int           addrStart = FTell();
-    local int           soldierIndex = j;
-    // 0
-    ushort              SoldierNo;                  // 我方0-7，敌方8-15，支援16-19，待分身20-21
-    ubyte               unknownFlags1 <format=hex, hidden=true>;
-    ubyte               Flags <format=hex>;                      // 10 敌方 40 己方 ...
-    ubyte               DeathFlags <format=hex>;                 // 02 不参与战场胜利判定 04 死后留在战场上
-    ubyte               UnderAttackFlags <format=hex>;           // 08 Resist ATDelay 02 不被击退 01 无法移动(移动会卡死)  10 无法被攻击到  20 强制miss
-    FSkip(4);   // 复制上面四个参数？？？
-    ushort              CharacterIndex;
-    FSkip(2);   // FF 00 常量？
-    ushort              ATActTime;  // AT条动多少次，初始为0; AiTime1F
-    FileIndex           SYFileIndex <format=hex>;
-    FileIndex           MSFileIndex <format=hex>;
-    FileIndex           ASFileIndex <format=hex>;    
-
-    ubyte               DUMMY_STRUCT_00[312] <hidden=true>;
-    ubyte               DUMMY_STRUCT_001[40] <hidden=true>;
-    ubyte               dieAfterSoldierNoDie <hidden=true>;   // 分身用，正常FF
-    ubyte               DUMMY_STRUCT_002[85] <hidden=true>;
-    ubyte               attackStatus[8] <hidden=true,hidden=true>;    
-    // 最近八次的攻击与被攻击情况 队列。从AT=0开始累计，下次AT=0时结果后移，位置0清空。
-    // 01 受到攻击掉血大于0; 02 发动攻击命中掉血; 04 上次未使用,对应AiTime09; 
-    // 08 受到攻击掉血大于1/10; 10 受到物理攻击命中掉血
-    ubyte               DUMMY_STRUCT_003[51] <hidden=true>;    
-    ubyte               IsLastFightMissToSoldierNo[16];// <hidden=true>;
-    ubyte               IsLastFightTargetToSoldierNo[16];// <hidden=true>;
-    ubyte               DUMMY_STRUCT_01[11] <hidden=true>;    
-    // 568
-    local uint          addrHP = FTell();
-    STATUS              StatusBasic;    // normal难度基础值
-    // 568 + 52
-    STATUS              StatusSum;      // 算上难度、装备、回路
-    ushort              MoveSPD <hidden=true>;                // 移动速度，我方人员也从ms文件中读取
-    ushort              MoveAfterAttack <hidden=true>;        // 从ms文件中读取
-    CONDITION           Condition[32];
-    ubyte               DUMMY_STRUCT_02[24] <hidden=true>;
-    uint                AT;
-    uint                AT2;    // AiTime08用
-    // 0x544
-    ushort              AIType;
-    ushort              EXPGet;                     // 战斗胜利 结算经验前暂存
-    ushort              DropIndex1 <hidden=true>;                 // 掉落物 物品代码
-    ushort              DropIndex2 <hidden=true>;
-    ubyte               DropProbability1 <hidden=true>;           // 掉落概率
-    ubyte               DropProbability2 <hidden=true>;    
-    ubyte               Sex <hidden=true>; 
-    ubyte               DisplayHighLevelArtsAttResistance <hidden=true>;      
-    // 是否开启时空幻有效率显示，0/8 不开启 1/9 开启，应该是标志位，可能含有更多信息
-    ushort              Equip[5];                   // 装备
-    ushort              Orb[7];                     // 回路   7个 
-
-    ED7_AI_INFO         NormalAttack;
-    ED7_AI_INFO         Arts[80];
-    ED7_AI_INFO         Craft[10];
-    ED7_AI_INFO         SCraft[5];
-    ED7_AI_INFO         SupportCraft[3]; 
-    CraftLastUsed_INFO  CraftLastUsed;
-    FleeParameter       fleeParameter <hidden=true>;
-    // 3768 + addrStart
-    // 16条战技定义共512字节，（说明256 名字32）共288x
-    local uint          addrCraftDefinition = FTell();
-    local ushort        CRAFT_INFO_SIZE = 32;   // 魔法条长度 碧轨24+4 空轨零轨28+4
-    ED7_CRAFT_DEFINITION_GROUP  CraftDefinition;    // 实际上只能放15个
-    // 4280
-    ////ubyte               DUMMY_STRUCT_06[32] <hidden=true>;
-    ubyte               DUMMY_STRUCT_07[288*16] <hidden=true>;    // 战技说明
-    ubyte               DUMMY_STRUCT_08[64] <hidden=true>;
-    // FSkip(288*15 + 352);
-    // 8952
-    ubyte               Sepith[7] <hidden=true>;                  // 掉落耀晶片
-    ubyte               DUMMY_STRUCT_09 <hidden=true>;
-    ushort              ArtsAttResistance[8] <hidden=true>;       // 七曜属性有效率
-    RESISTANCE          Resistance;
-    ubyte               DUMMY_STRUCT_11[132] <hidden=true>;
-
-    FSeek(addrBattleStart + 0x660 + 0x320*soldierIndex + 0xE0);
-    string              CharacterName;
-    // 9112
-    FSeek(addrStart + 0x2398);
-    string              CharacterIntro;
-    FSeek(addrStart + 0x2418);
-    ubyte               DUMMY_STRUCT_12[8] <hidden=true>;
-    FSeek(addrStart + CHR_BATTLE_INF_SIZE);
-    // 9112 + 164 = 9276 243C
-
-} ED7_CHARACTER_BATTLE_INF <read = readMSFileIndex>;
-
-string readMSFileIndex(ED7_CHARACTER_BATTLE_INF &a)
-{
-    string  temp;
-    SPrintf(temp,"ms%x",a.MSFileIndex);
-    temp = StrDel(temp,2,3);
-    return  temp + " " + a.CharacterName;
-}
-
 // 杂项，合在一块
 //-----------------------------------------------------------------------------------------------------------
 typedef struct
@@ -978,7 +874,7 @@ typedef struct
     // 拥有的物品及数量
     FSeek(addrBase + 0x79EE8);
     ItemInBagGroup  itemInBag;
-    
+
     // 正在播放的BGM编号
     FSeek(addrBase + 0x24E);
     ushort          BGMNowIndex;
@@ -988,7 +884,7 @@ typedef struct
 
     FSeek(addrBase + 0x78FD8);
     ushort  FurnitureSet;
-    // 家具设置已提示 00 40; 导力车模型 40 00, 导力音响 80 00; 
+    // 家具设置已提示 00 40; 导力车模型 40 00, 导力音响 80 00;
     // 挂钟 00 01, 典雅花瓶 00 02;壁挂咪西 00 04, 坐姿咪西 00 08; 伊莉娅的海报 00 10, 飞镖套装 00 20;
     // 和家具无关的. 地下空间A通往中央广场的楼梯处剧情已进行 08 00; 警察本部出示战斗手册已提示 04 00; 游击士协会2L 2个MM和Tio的剧情已进行 01 00
     ubyte           CatFeed;    // 可以喂猫已提示 01; 1章-2章-3章-间章-4章-终章 02-04-08-10-20-40; 7F减去对应章节的数字，任何章节都能拿双子珠..DT
@@ -1033,7 +929,7 @@ typedef struct
 
     FSeek(addrBase + 0xA51FC);
     ubyte           ExtraFlag;      // 是否显示EXTRA，开始界面进OPTION切换有效，一般为03，02位置意义不明
-    
+
     FSeek(addrBase + 0x7E054);
     uint            RecipeNote[3];  // 料理手册。 菜谱取得、大成功料理取得、预想外料理取得，全开FE FF FF 01(0x01FFFFFE)
 
@@ -1071,11 +967,11 @@ typedef struct
     STATUS          Status[12];
     // 0x79438
     EQUIP           Equip[12];
-    // 
+    //
     ARTS            Arts[12];
-    // 
+    //
     CRAFT           Craft[12];
-    // 
+    //
     SCRAFT          SCraft[12];
     // 0x79D98
     ORBMENT         Orbment[12] <optimize=true>;
@@ -1090,7 +986,31 @@ typedef struct
     // ProcessHeapToLocalAddress()
     // ProcessLocalToHeapAddress()
     SetForeColor(cRed); // 颜色
-    local uint addrMemBase = ReadUInt(ProcessHeapToLocalAddress(0xB9A7F0));
+    local INT32     addrFind = ProcessHeapToLocalAddress(0x400000);
+    // find addrCGlobal*
+    while (1)
+    {
+        addrFind = FindFirst("83 B8 6C 0C 08 00 00,h", true, false, FINDMETHOD_NORMAL, 0, 1, addrFind, 0x400000 + 0xA00000 - ProcessLocalToHeapAddress(addrFind));
+        if (addrFind < 0)
+        {
+            Printf("Search for addrCGlobal failed!\n");
+            return;
+        }
+        else
+        {
+            if (ReadUByte(addrFind - 5) == 0xA1)    // 006C7EFF   .  A1 F0A7B900           MOV EAX,DWORD PTR DS:[0xB9A7F0]
+            {
+                Printf("addrCGlobal = [0x%X]\n", ReadUInt(addrFind - 4));
+                local uint addrMemBase = ReadUInt(ProcessHeapToLocalAddress(ReadUInt(addrFind - 4)));
+                break;
+            }
+            else
+            {
+                addrFind += 7;
+            }
+        }
+    }
+    //local uint addrMemBase = ReadUInt(ProcessHeapToLocalAddress(0xB9A7F0));
     local uint addrBase = ProcessHeapToLocalAddress(addrMemBase);
 
     FSeek(addrBase + 0x3D7D8 + 0x58);
@@ -1123,13 +1043,13 @@ typedef struct
     uint addrMemT_msas <format=hex, hidden=true>;
 
     local uint addrMemT_mons = ReadUInt(ProcessHeapToLocalAddress(0xD3D7B8));
-    //local uint addrMemT_btrev = 
+    //local uint addrMemT_btrev =
 
     FSeek(addrBase + 0x80BE8);
     uint addrMemTime <format=hex, hidden=true>;
 
     FSeek(addrBase + 0x80C6C);
-    uint addrMemBattleStart <format=hex, hidden=true>;
+    uint addrMemCBattle <format=hex, hidden=true>;
 
     FSeek(addrBase + 0x38498);
     uint addrMemMarkScena1 <format=hex, hidden=true>;
@@ -1170,10 +1090,10 @@ typedef struct
     local uint addrT_msas = ProcessHeapToLocalAddress(addrMemT_msas);
 
     local uint addrT_mons = ProcessHeapToLocalAddress(addrMemT_mons);
-    //local uint addrT_btrev = 
+    //local uint addrT_btrev =
 
     local uint addrTime = ProcessHeapToLocalAddress(addrMemTime);
-    local uint addrBattleStart = ProcessHeapToLocalAddress(addrMemBattleStart);
+
     local uint addrScenaFileIndex; // 循环用
     local uint addrScenaFile[6];
     for (addrScenaFileIndex = 0; addrScenaFileIndex < 6; addrScenaFileIndex++)
@@ -1233,7 +1153,7 @@ typedef struct
             ScenaFile   scenaFile5(addrScenaFile[5]);
         }
 
-        FSeek(addrScenaFile[0]);    // =? addrBase + 0xC3880 
+        FSeek(addrScenaFile[0]);    // =? addrBase + 0xC3880
         ScenaFile   scenaFile(addrScenaFile[0]);
 
     }
@@ -1251,7 +1171,7 @@ typedef struct
         ScenaCharacterInf2Group     scenaCharacterInf2;
     }
 */
-    
+
     // 角色信息 战斗外
     FSeek(addrBase + 0x791B8);
     MENU            menu;
@@ -1271,39 +1191,44 @@ typedef struct
         BattleInitGroup battleInit;
     }
 
-    // 战斗部分
-    if (addrMemBattleStart != 0)
+// CBattle
+if (FSeekHeap(addrMemCBattle) >= 0)
+{
+    local ULONG addrCBattleLocal    = FTell();
+    #define addrBattleStart addrCBattleLocal
+
+    //FSeek(addrCBattleLocal + 0xAC);
+    //string            BattleMap;
+
+    FSeek(addrCBattleLocal + 0x4E40);
+    if (!exists(i))
     {
-        local int       i = 0, j = 0;
-        local int       CHR_BATTLE_INF_SIZE = 0x243C;
-        local uint      addrChr0 = addrBattleStart + 0x4E40;
-        //FSeek(addrBattleStart + 0xAC);
-        //string            BattleMap;
-        FSeek(addrChr0);
-        for (j = 0; j == ReadUShort(FTell()); j++)
-        ////for (j = 0; j < 23; j++)
-        {
-            if (ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 16) == 0 && 
-                ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 20) == 0 &&
-                ReadUInt(addrChr0 + CHR_BATTLE_INF_SIZE*j + 24) == 0 )
-                ED7_CHARACTER_BATTLE_INF    ED7_character_battle_inf <hidden=true>;//
-            else
-                ED7_CHARACTER_BATTLE_INF    ED7_character_battle_inf;
-        }
+        local ULONG i;
+    }
+    for (i = 0; i == ReadUShort(FTell()); ++i)
+    //for (i = 0; i < 23; ++i)
+    {
+        if (ReadUInt(FTell() + 0x10) == 0 &&
+            ReadUInt(FTell() + 0x14) == 0 &&
+            ReadUInt(FTell() + 0x18) == 0)
+            CHR_BATTLE_INF  ChrBattleInf    <hidden=true>;
+        else
+            CHR_BATTLE_INF  ChrBattleInf;
+    }
 
         FSeek(addrBattleStart + 0xE8750);
         short       ChainedBattleIndex; // 连战第几场 0-2
-        
+
         FSeek(addrBattleStart + 0xE8752);
         ushort      SepithGet[7];       // 战斗结束获得的耀晶片
-        
+
         ////while(ReadUShort(FTell()) > 0)
         ////ItemInBag   ItemGet(1);
         ItemInBag   ItemGet(0x10)[8] <optimize=true>;   // 战斗结束获得的物品，最多8种
-        
+
         FSeek(addrBattleStart + 0x9C512);
         ubyte       EscapeSuccessProbablity;    // 撤退成功率
-        
+
         FSeek(addrBattleStart + 0x9C354);
         byte        BattleStartCondition;   // 战斗开场状况 0 普通, 1 被偷袭, 02 先制, 04 奇袭, 可以锁定..
 
@@ -1327,9 +1252,9 @@ typedef struct
 
         FSeek(addrBattleStart + 0xE892E);
         ushort      battleParUnknown;
-    
+
         ////FSeek(addrBattleStart + 0x9BF50 + 0x1F0 + 0x96);    // 撤退按钮
-        FSeek(addrBattleStart + 0x9BF50);       
+        FSeek(addrBattleStart + 0x9BF50);
         BattleButtonGroup   battleButton;
 
         FSeek(addrBattleStart + 0xE88A8);   // 参数含08的话, or 00010000; 参数含02的话, or 04
@@ -1337,15 +1262,21 @@ typedef struct
         FSeek(addrBattleStart + 0xE88AE);
         ushort      battleParameterDup;
     */
-    }
+
+    FSeek(addrBattleStart + 0x9C348);
+    int atLastElapse;
+
+//  FSeek(addrBattleStart + 0xE8898);
+//  int supportAt350_200; //通常350AT，危急200AT 初始；支援人员数为2时，AT双倍流逝，否则1倍
+}
 
     /*
     [[0xB9A7F0]+0x38498] == [0xB9A7F0]+0x78EEC  [05EC3608] 05F0405C
     [[[0xB9A7F0]+0x38498]+0x2C0] = 19A7B1D0      +2BC 19A52D80      保存场景中每个角色的信息，每人18C， 敌方2BC  pmwTop/objTop
     [[0xB9A7F0]+0x38498+9F4]    scenaFile   05F4E9F0
     [[0xB9A7F0]+0x38498]+631D   敌方初始编号放这
-    05E8B170    
-    5F4EF10 
+    05E8B170
+    5F4EF10
 
 FSeek(addrT_world);
 byte    T_world_start;
@@ -1365,21 +1296,14 @@ typedef struct
     FSeek(ProcessHeapToLocalAddress(ReadUInt(addrBase + 0x38498) + 0x2*4 + 0x4F48));
     int par021F_0002;
 
-//  FSeek(addrBattleStart);
-//  int markAddrBattleStart;
-    FSeek(addrBattleStart + 0x9C348);
-    int atLastElapse;
     FSeek(addrBase+0xB9E24);
     FSeek(addrBase+0xB0068);
     ushort  supportAtRemain;
 
-//  FSeek(addrBattleStart + 0xE8898);
-//  int supportAt350_200; //通常350AT，危急200AT 初始；支援人员数为2时，AT双倍流逝，否则1倍
-
 //  FSeek(addrBase + 0x7FD14);
 //  string keys;
 //  FSeek(addrBase + 0x7F40C);
-//  int key;    
+//  int key;
 } Parameter;
 
 FSeek(addrBase);

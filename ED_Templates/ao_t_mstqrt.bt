@@ -95,7 +95,7 @@ typedef struct(int parMasterQuartz)
 wstring readMasterQuartz(MasterQuartz &a)
 {
     wstring wstr = MasterQuartzIndex2Name(a.Index);
-    return  wstr + GenerateWStringByFill(L' ', 24 - WStrWidth(wstr)) + StringToWString(a.Lv[4].Intro[0].str, GetFileCharSet());
+    return  wstr + WStringConstructByFill(L' ', 24 - WStrWidth(wstr)) + StringToWString(a.Lv[4].Intro[0].str, GetFileCharSet());
 }
 
 void writeMasterQuartz(MasterQuartz &a, string s) {;}
